@@ -9,7 +9,7 @@
         </div>
       </v-card-title>
       <v-card-actions>
-        <v-btn flat>Visit</v-btn>
+        <v-btn :href="href" target="_blank" flat>Visit</v-btn>
         <v-spacer></v-spacer>
         <v-btn flat disabled>{{ year }}</v-btn>
       </v-card-actions>
