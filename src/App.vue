@@ -52,7 +52,7 @@
       <v-toolbar app fixed clipped-left dark color="black">
         <v-toolbar-side-icon v-on:click.native="drawer = !drawer" />
         <v-avatar size="36">
-          <img src="../src/assets/svg/zalog.ro-logo.svg" alt="avatar">
+          <img src="@/assets/zalog.ro-logo.svg" alt="avatar">
         </v-avatar>
         <v-toolbar-title>Zălog Cătălin</v-toolbar-title>
         <v-spacer></v-spacer>
