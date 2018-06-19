@@ -52,9 +52,13 @@
       <v-toolbar app fixed clipped-left dark color="black">
         <v-toolbar-side-icon v-on:click.native="drawer = !drawer" />
         <v-avatar size="36">
-          <img src="@/assets/zalog.ro-logo.svg" alt="avatar">
+          <v-btn icon to="/">
+            <img src="@/assets/zalog.ro-logo.svg" alt="avatar">
+          </v-btn>
         </v-avatar>
-        <v-toolbar-title>Zălog Cătălin</v-toolbar-title>
+        <v-toolbar-title>
+          <router-link to="/">Zălog Cătălin</router-link>
+        </v-toolbar-title>
         <v-spacer></v-spacer>
         <div class="hidden-sm-and-down">
           <v-btn v-for="(item, index) in socialProfiles" :key="index" :href="item.href" target="_blank" icon flat>
@@ -112,6 +116,25 @@ export default {
 .toolbar {
   .btn {
     opacity: .4;
+    &:hover {
+      opacity: 1;
+    }
+  }
+  .avatar .btn {
+    margin: 0;
+    opacity: .8;
+
+    &:hover {
+      opacity: 1;
+    }
+  }
+}
+.toolbar__title {
+  a {
+    color: inherit;
+    opacity: .8;
+    text-decoration: none;
+
     &:hover {
       opacity: 1;
     }
