@@ -16,16 +16,6 @@
                 <v-list-tile-title v-html="'Projects'" />
               </v-list-tile-content>
             </v-list-tile>
-            <v-list-tile to="/about">
-              <v-list-tile-content>
-                <v-list-tile-title v-html="'About'" />
-              </v-list-tile-content>
-            </v-list-tile>
-            <v-list-tile to="/contact">
-              <v-list-tile-content>
-                <v-list-tile-title v-html="'Contact'" />
-              </v-list-tile-content>
-            </v-list-tile>
 
           </v-list>
 
