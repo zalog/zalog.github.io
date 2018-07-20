@@ -10,7 +10,8 @@ import store from './store'
 Vue.config.productionTip = false
 
 Vue.use(VueAnalytics, {
-  id: 'UA-1205565-7'
+  id: 'UA-1205565-7',
+  router
 })
 
 Vue.use(Vuetify)
