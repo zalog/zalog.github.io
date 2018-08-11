@@ -338,7 +338,7 @@ export default new Vuex.Store({
       },
       {
         name: 'iaa.ro',
-        href: 'http://iaa.1616.ro/',
+        href: 'http://www.iaa.ro/',
         skills: ['wordpress', 'php', 'html', 'css', 'sass', 'bootstrap', 'jQuery', 'javascript', 'webpack', 'gulp', 'nodejs', 'git'],
         year: '2018'
       }
