@@ -1,0 +1,14 @@
+---
+import { profile } from '../data/content';
+
+const year = new Date().getFullYear();
+---
+
+<footer class="layer gutter mt-16 border-t border-line bg-bg">
+  <p class="mx-auto max-w-5xl py-6 font-mono text-xs text-muted">© <span data-current-year>{year}</span> {profile.name}</p>
+</footer>
+
+<script>
+  // The build year would stay until the next deploy
+  document.querySelectorAll('[data-current-year]').forEach((el) => (el.textContent = String(new Date().getFullYear())));
+</script>
