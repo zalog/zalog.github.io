@@ -1,0 +1,22 @@
+---
+import type { Lang } from '../data/content';
+import { useT } from '../i18n';
+
+interface Props {
+  lang: Lang;
+}
+
+const { lang } = Astro.props;
+const t = useT(lang);
+// The phrase between *asterisks* is set in the accent colour
+const parts = t('statement')
+  .split(/(\*[^*]+\*)/)
+  .filter(Boolean)
+  .map((chunk) => ({ accent: chunk.startsWith('*'), text: chunk.replaceAll('*', '') }));
+---
+
+<section id="statement" aria-label={t('approach')}>
+  <p class="statement max-w-[44rem] text-3xl leading-[1.15] font-semibold tracking-tight sm:text-5xl">
+    {parts.map((p) => (p.accent ? <span class="text-accent">{p.text}</span> : p.text))}
+  </p>
+</section>

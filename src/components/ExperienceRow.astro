@@ -1,0 +1,24 @@
+---
+import type { Lang, Role } from '../data/content';
+import { pick, useT } from '../i18n';
+
+interface Props {
+  role: Role;
+  lang: Lang;
+}
+
+const { role: x, lang } = Astro.props;
+const t = useT(lang);
+---
+
+<li id={`exp-${x.id}`} class="reveal grid gap-x-8 gap-y-1 border-b border-line py-4 last:border-b-0 sm:grid-cols-[8rem_1fr]">
+  <p class="font-mono text-sm text-muted tabular-nums sm:pt-0.5">
+    {x.from === x.to ? x.from : `${x.from} – ${x.to ?? t('present')}`}
+  </p>
+  <div class="min-w-0">
+    <p class="text-muted">
+      <span class="font-semibold text-fg">{pick(x.company, lang)}</span> · {[x.role, x.type && t(x.type)].filter(Boolean).join(' · ')}
+    </p>
+    {x.text && <p class="mt-1 max-w-[38rem] text-muted">{x.text[lang]}</p>}
+  </div>
+</li>

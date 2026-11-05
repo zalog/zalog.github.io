@@ -1,0 +1,57 @@
+---
+import { getRelativeLocaleUrl } from 'astro:i18n';
+import { profile, type Lang } from '../data/content';
+import { useT } from '../i18n';
+
+interface Props {
+  lang: Lang;
+}
+
+const { lang } = Astro.props;
+const t = useT(lang);
+const languages: { code: Lang; label: string }[] = [
+  { code: 'en', label: 'EN' },
+  { code: 'ro', label: 'RO' },
+];
+---
+
+<header class="sticky-head gutter">
+  <div class="mx-auto flex max-w-5xl items-center gap-4 py-5">
+    <a href={getRelativeLocaleUrl(lang, '')} class="flex items-center rounded-md" aria-label={t('home', { name: profile.name })}>
+      <svg viewBox="0 0 166 145" width="34" height="30" aria-hidden="true" class="shrink-0">
+        <rect width="166" height="145" fill="var(--fg)"></rect>
+        <polyline fill="var(--bg)" points="49 97 78 97 78 116 48.52 116 29 116 29 29 48.52 29 78 29 78 48 49 48"></polyline>
+        <polygon fill="var(--bg)" points="79 29 137 29 137 47.97 100.63 97 137 97 137 116 79 116 79 97 118.78 48 79 48 79 29"></polygon>
+      </svg>
+    </a>
+
+    <nav class="head-nav" aria-label={t('navMain')}>
+      <ul class="flex items-center gap-0.5 text-sm sm:gap-3">
+        <li><a class="rounded px-1.5 py-1 text-muted hover:text-fg" href="#experience">{t('navExperience')}</a></li>
+        <li class="hidden sm:block"><a class="rounded px-1.5 py-1 text-muted hover:text-fg" href="#projects">{t('navProjects')}</a></li>
+        <li><a class="rounded px-1.5 py-1 text-muted hover:text-fg" href="#contact">{t('navContact')}</a></li>
+      </ul>
+    </nav>
+
+    <ul class="ml-auto flex items-center gap-1 font-mono text-xs" aria-label={t('language')}>
+      {
+        languages.map((l) => (
+          <li>
+            <a
+              class:list={['lang-link rounded px-1.5 py-1', l.code === lang ? 'text-fg underline underline-offset-4' : 'text-muted hover:text-fg']}
+              href={getRelativeLocaleUrl(l.code, '')}
+              hreflang={l.code}
+              lang={l.code}
+              data-lang={l.code}
+              aria-current={l.code === lang ? 'page' : undefined}
+            >
+              {l.label}
+            </a>
+          </li>
+        ))
+      }
+    </ul>
+
+    <slot />
+  </div>
+</header>

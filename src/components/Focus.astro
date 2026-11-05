@@ -1,0 +1,26 @@
+---
+import { focus, type Lang } from '../data/content';
+import { pick, useT } from '../i18n';
+
+interface Props {
+  lang: Lang;
+}
+
+const { lang } = Astro.props;
+const t = useT(lang);
+---
+
+<section id="focus" class="scroll-mt-24" aria-labelledby="focus-title">
+  <h2 id="focus-title" class="mb-6 text-2xl font-semibold tracking-tight">{t('focusTitle')}</h2>
+  <ul class="grid gap-x-10 gap-y-6 sm:grid-cols-2">
+    {
+      focus.map((f) => (
+        <li class="reveal min-w-0">
+          <h3 class="font-semibold">{pick(f.title, lang)}</h3>
+          <p class="mt-1 text-muted">{f.text[lang]}</p>
+        </li>
+      ))
+    }
+  </ul>
+  <p class="mt-8 max-w-[38rem] text-sm text-muted">{t('side')}</p>
+</section>

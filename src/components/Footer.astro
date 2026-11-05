@@ -1,0 +1,24 @@
+---
+import { profile, type Lang } from '../data/content';
+import { useT } from '../i18n';
+
+interface Props {
+  lang: Lang;
+}
+
+const { lang } = Astro.props;
+const t = useT(lang);
+const year = new Date().getFullYear();
+---
+
+<footer class="layer gutter mt-16 border-t border-line bg-bg">
+  <div class="mx-auto flex max-w-5xl flex-wrap items-center justify-between gap-x-6 gap-y-2 py-6 font-mono text-xs text-muted">
+    <p>© <span data-current-year>{year}</span> {profile.name}</p>
+    <p>{t('built')}</p>
+  </div>
+</footer>
+
+<script>
+  // The build year would stay until the next deploy
+  document.querySelectorAll('[data-current-year]').forEach((el) => (el.textContent = String(new Date().getFullYear())));
+</script>

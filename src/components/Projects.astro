@@ -1,0 +1,88 @@
+---
+import { earlier, recent, type Lang } from '../data/content';
+import { pick, slug, useT } from '../i18n';
+
+interface Props {
+  lang: Lang;
+}
+
+const { lang } = Astro.props;
+const t = useT(lang);
+
+const years = [...new Set(earlier.map((s) => s.year))].sort((a, b) => b - a);
+const sites = years.flatMap((year) => earlier.filter((s) => s.year === year));
+
+const highlights = earlier.filter((s) => s.featured).map((s) => s.name);
+---
+
+<section id="projects" class="scroll-mt-24" aria-labelledby="projects-title">
+  <div class="mb-6 flex flex-wrap items-baseline justify-between gap-x-6 gap-y-1">
+    <h2 id="projects-title" class="text-2xl font-semibold tracking-tight">{t('projectsTitle')}</h2>
+    <p class="font-mono text-sm text-muted">{t('projectsMeta')}</p>
+  </div>
+
+  <ul class="border-t border-line">
+    {
+      recent.map((r) => (
+        <li id={`proj-${r.id}`} class="reveal row grid gap-x-8 gap-y-1 border-b border-line py-5 sm:grid-cols-[8rem_1fr]">
+          <p class="font-mono text-sm text-muted tabular-nums sm:pt-1">{r.year}</p>
+          <div class="min-w-0">
+            <h3 class="text-lg font-semibold">
+              {r.href ? (
+                <a class="inline-flex items-baseline gap-2 hover:text-accent" href={r.href} target="_blank" rel="noopener">
+                  {pick(r.name, lang)}
+                  <span class="sr-only"> {t('newTab')}</span>
+                  <span class="row-arrow text-base text-muted" aria-hidden="true">↗</span>
+                </a>
+              ) : (
+                pick(r.name, lang)
+              )}
+            </h3>
+            <p class="font-mono text-xs text-muted">{r.client[lang]} · {t('contract')}</p>
+            <p class="mt-2 max-w-[38rem]">{r.text[lang]}</p>
+            <p class="mt-2 font-mono text-xs text-muted">{r.stack.join(' · ')}</p>
+          </div>
+        </li>
+      ))
+    }
+    {/* .reveal is on the text, not the row: the list below makes the row taller, which rewinds its scroll animation */}
+    <li class="grid gap-x-8 gap-y-1 py-5 sm:grid-cols-[8rem_1fr]">
+      <p class="reveal font-mono text-sm text-muted tabular-nums sm:pt-1">{years.at(-1)} – {years[0]}</p>
+      <div class="reveal min-w-0">
+        <h3 class="text-lg font-semibold">{t('archiveTitle')}</h3>
+        <p class="mt-2 max-w-[38rem]">{t('archiveIntro', { sites: highlights.join(', ') })}</p>
+      </div>
+      <details id="archive" class="group sm:col-span-2">
+        <summary class="bracket mt-4 font-mono text-sm sm:ml-40">
+          <span class="group-open:hidden">{t('viewMore')}</span>
+          <span class="hidden group-open:inline">{t('viewLess')}</span>
+          <span class="caret inline-block" aria-hidden="true">›</span>
+        </summary>
+        <ul class="mt-5 border-t border-line">
+          {
+            sites.map((s) => (
+              <li id={`site-${slug(s.name)}`} class="reveal row grid gap-x-8 gap-y-1 border-b border-line py-5 last:border-b-0 sm:grid-cols-[8rem_1fr]">
+                <p class="font-mono text-sm text-muted tabular-nums sm:pt-1">{s.year}</p>
+                <div class="min-w-0">
+                  <h4 class="text-lg font-semibold break-words">
+                    {s.href ? (
+                      <a class="inline-flex items-baseline gap-2 hover:text-accent" href={s.href} target="_blank" rel="noopener">
+                        {s.name}
+                        <span class="sr-only"> {t('newTab')}</span>
+                        <span class="row-arrow text-base text-muted" aria-hidden="true">↗</span>
+                      </a>
+                    ) : (
+                      s.name
+                    )}
+                  </h4>
+                  <p class="font-mono text-xs text-muted">{[s.about[lang], !s.href && t('noLink')].filter(Boolean).join(' · ')}</p>
+                  <p class="mt-2 font-mono text-xs text-muted break-words">{s.skills.join(' · ')}</p>
+                </div>
+              </li>
+            ))
+          }
+        </ul>
+      </details>
+    </li>
+  </ul>
+</section>

@@ -1,0 +1,40 @@
+---
+import '@fontsource-variable/schibsted-grotesk';
+import '@fontsource/ibm-plex-mono/400.css';
+import '@fontsource/ibm-plex-mono/500.css';
+import '../styles/global.css';
+import sansLatin from '@fontsource-variable/schibsted-grotesk/files/schibsted-grotesk-latin-wght-normal.woff2?url';
+import sansLatinExt from '@fontsource-variable/schibsted-grotesk/files/schibsted-grotesk-latin-ext-wght-normal.woff2?url';
+import { getAbsoluteLocaleUrl } from 'astro:i18n';
+import { profile, years, type Lang } from '../data/content';
+import { useT } from '../i18n';
+
+interface Props {
+  lang: Lang;
+}
+
+const { lang } = Astro.props;
+const t = useT(lang);
+const canonical = getAbsoluteLocaleUrl(lang, '');
+---
+
+<!doctype html>
+<html lang={lang}>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    {/* the first layout needs this font: with the fallback the statement is shorter, so a reload cannot restore the scroll position yet */}
+    <link rel="preload" href={sansLatin} as="font" type="font/woff2" crossorigin />
+    <link rel="preload" href={sansLatinExt} as="font" type="font/woff2" crossorigin />
+    <title>{`${profile.name} · ${profile.role}`}</title>
+    <meta name="description" content={t('metaDescription', years)} />
+    <link rel="canonical" href={canonical} />
+    <link rel="icon" href="/favicon.ico" sizes="any" />
+    <slot name="head" />
+  </head>
+  <body>
+    <a href="#main" class="skip rounded-md bg-fg px-4 py-2 text-sm font-medium text-bg">{t('skip')}</a>
+    <div class="frame" aria-hidden="true"><div></div></div>
+    <slot />
+  </body>
+</html>
