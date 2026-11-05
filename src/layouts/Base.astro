@@ -46,6 +46,12 @@ const canonical = getAbsoluteLocaleUrl(lang, '');
         if ('popover' in HTMLElement.prototype) d.setAttribute('data-popover', '');
       })();
     </script>
+    {/* Cloudflare Web Analytics sets no cookies, so it needs no consent banner */}
+    {
+      import.meta.env.PROD && (
+        <script is:inline type="module" src="https://static.cloudflareinsights.com/beacon.min.js" data-cf-beacon='{"token": "8dfab81fc4ec4d89a0583df9496d5cbc"}'></script>
+      )
+    }
     <slot name="head" />
   </head>
   <body>
