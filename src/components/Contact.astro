@@ -8,6 +8,9 @@ interface Props {
 
 const { lang } = Astro.props;
 const t = useT(lang);
+// Only the scrambled form goes into the page, so no file holds the address as text
+const key = 23;
+const code = [...profile.email.join('@')].map((c) => (c.charCodeAt(0) ^ key).toString(16).padStart(2, '0')).join('');
 ---
 
 <section id="contact" class="scroll-mt-24" aria-labelledby="contact-title">
@@ -16,10 +19,25 @@ const t = useT(lang);
   <div class="grid gap-8 sm:grid-cols-2">
     <div>
       <p class="mb-1 font-mono text-xs text-muted">{t('phone')}</p>
-      <p class="flex flex-wrap items-center gap-3">
+      <p class="flex flex-wrap items-baseline gap-x-2">
         <a id="phone" class="text-xl font-semibold tabular-nums" href={`tel:${profile.phone.e164}`}>{profile.phone.shown}</a>
-        <slot name="phone-actions" />
+        <button type="button" hidden class="font-mono text-xs text-muted before:mr-2 before:content-['·'] hover:text-fg hover:before:text-muted" data-copy="phone" data-copied={t('copied')}>
+          {t('copy')}
+        </button>
+        <a class="font-mono text-xs text-muted before:mr-2 before:content-['·'] hover:text-fg hover:before:text-muted" href={`https://wa.me/${profile.phone.e164.slice(1)}`} target="_blank" rel="noopener">
+          WhatsApp<span class="sr-only"> {t('newTab')}</span>
+        </a>
       </p>
+      {/* invisible, not hidden: it keeps its space, so the page does not grow while someone scrolls to Contact */}
+      <div class="invisible mt-6" data-reach>
+        <p class="mb-1 font-mono text-xs text-muted">{t('writeMe')}</p>
+        <p class="flex min-h-7 flex-wrap items-baseline gap-x-2">
+          <a id="reach" class="text-xl font-semibold break-all" data-code={code} data-key={key}></a>
+          <button type="button" hidden class="font-mono text-xs text-muted before:mr-2 before:content-['·'] hover:text-fg hover:before:text-muted" data-copy="reach" data-copied={t('copied')}>
+            {t('copy')}
+          </button>
+        </p>
+      </div>
     </div>
     <div class="min-w-0">
       <p class="mb-1 font-mono text-xs text-muted">{t('elsewhere')}</p>
@@ -38,3 +56,46 @@ const t = useT(lang);
     </div>
   </div>
 </section>
+
+<script>
+  // Decoded only when Contact comes near, so bots that do not scroll never see it
+  const block = document.querySelector<HTMLElement>('[data-reach]');
+  const link = document.querySelector<HTMLAnchorElement>('#reach');
+  const contact = document.getElementById('contact');
+  if (block && link && contact) {
+    new IntersectionObserver(
+      (entries, io) => {
+        if (!entries[0].isIntersecting) return;
+        io.disconnect();
+        const key = Number(link.dataset.key);
+        const address = String.fromCharCode(...(link.dataset.code?.match(/../g) ?? []).map((h) => parseInt(h, 16) ^ key));
+        link.href = `mailto:${address}`;
+        link.textContent = address;
+        block.classList.remove('invisible');
+      },
+      { rootMargin: '0px 0px 600px 0px' },
+    ).observe(contact);
+  }
+
+  document.querySelectorAll<HTMLButtonElement>('[data-copy]').forEach((btn) => {
+    const target = document.getElementById(btn.dataset.copy ?? '');
+    if (!target) return;
+    btn.hidden = false;
+    const label = btn.textContent?.trim() ?? '';
+    const select = () => {
+      const range = document.createRange();
+      range.selectNodeContents(target);
+      const sel = getSelection();
+      sel?.removeAllRanges();
+      sel?.addRange(range);
+    };
+    btn.addEventListener('click', () => {
+      const done = () => {
+        btn.textContent = btn.dataset.copied ?? label;
+        setTimeout(() => (btn.textContent = label), 1600);
+      };
+      if (navigator.clipboard?.writeText) navigator.clipboard.writeText(target.textContent ?? '').then(done, select);
+      else select();
+    });
+  });
+</script>

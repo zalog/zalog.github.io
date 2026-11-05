@@ -9,13 +9,14 @@ export interface Recent { id: string; name: string | Localized; href?: string; y
 /** Without `href` the site is offline; `featured` sites are named in the intro of "Earlier projects" */
 export interface Site { name: string; href?: string; skills: string[]; year: number; about: Localized; featured?: boolean }
 
-/** Who the site is about */
+/** The email is kept in two parts, so no file holds the address as text. */
 export const profile = {
   name: "Cătălin Zălog",
   role: "Senior Frontend Developer",
   city: { en: "Bucharest", ro: "București" } as Localized,
   stack: ["React", "Next.js", "TypeScript", "Node.js"],
   phone: { shown: "+40 721 213 882", e164: "+40721213882" },
+  email: ["catalin.site", "zalog.ro"],
 };
 
 /** Counted when the site is built, so each build has the current numbers */
