@@ -1,13 +1,16 @@
 export type Lang = "en" | "ro";
 export type Localized = Record<Lang, string>;
 
-/** `id` is the row's anchor (#exp- or #proj-<id>) */
-export interface Result { key: string | Localized; where: string | Localized; text: Localized }
-export interface Focus { title: string | Localized; text: Localized }
-export interface Role { id: string; company: string | Localized; from: number; to: number | null; role: string; type?: "parttime" | "volunteer" | "freelance" | "contract" | "intern"; text?: Localized }
-export interface Recent { id: string; name: string | Localized; href?: string; year: number; client: Localized; stack: string[]; text: Localized }
-/** Without `href` the site is offline; `featured` sites are named in the intro of "Earlier projects" */
-export interface Site { name: string; href?: string; skills: string[]; year: number; about: Localized; featured?: boolean }
+/** Labels shown on the particle background; each one links to the row it belongs to */
+export type Labels = (string | Localized)[];
+
+/** `id` is the row's anchor (#res-, #exp- or #proj-<id>) */
+export interface Result { id: string; key: string | Localized; where: string | Localized; text: Localized; labels?: Labels }
+export interface Focus { title: string | Localized; text: Localized; labels?: Labels }
+export interface Role { id: string; company: string | Localized; from: number; to: number | null; role: string; type?: "parttime" | "volunteer" | "freelance" | "contract" | "intern"; text?: Localized; labels?: Labels }
+export interface Recent { id: string; name: string | Localized; href?: string; year: number; client: Localized; stack: string[]; text: Localized; labels?: Labels }
+/** Without `href` the site is offline; `featured` sites are named in the intro of "Earlier projects" and on the particle background */
+export interface Site { name: string; href?: string; skills: string[]; year: number; about: Localized; featured?: boolean; labels?: Labels }
 
 /** The email is kept in two parts, so no file holds the address as text. */
 export const profile = {
@@ -25,6 +28,8 @@ export const years = { web: thisYear - 2002, react: thisYear - 2018 };
 
 export const results: Result[] = [
   {
+    "id": "school-principals",
+    "labels": [{ "en": "~7k applications", "ro": "~7k de dosare" }],
     "key": "~7k",
     "where": {
       "en": "Ministry of Education and Research",
@@ -36,6 +41,8 @@ export const results: Result[] = [
     }
   },
   {
+    "id": "vivre-migration",
+    "labels": [{ "en": "~60k concurrent users", "ro": "~60k de utilizatori simultani" }, "PageSpeed 15 → 90"],
     "key": {
       "en": "4 months",
       "ro": "4 luni"
@@ -47,6 +54,8 @@ export const results: Result[] = [
     }
   },
   {
+    "id": "bootstrap",
+    "labels": [{ "en": "Bootstrap · 44 commits", "ro": "Bootstrap · 44 de commit-uri" }],
     "key": "44",
     "where": "Bootstrap",
     "text": {
@@ -55,6 +64,7 @@ export const results: Result[] = [
     }
   },
   {
+    "id": "placeholder-loading",
     "key": "~20k",
     "where": "placeholder-loading",
     "text": {
@@ -67,6 +77,7 @@ export const results: Result[] = [
 export const focus: Focus[] = [
   {
     "title": profile.stack.join(" · "),
+    "labels": [profile.stack.slice(0, 3).join(" · "), "SSR · ISR"],
     "text": {
       "en": "Component systems, SSR and ISR, performance budgets.",
       "ro": "Sisteme de componente, SSR și ISR, bugete de performanță."
@@ -77,6 +88,7 @@ export const focus: Focus[] = [
       "en": "Design systems",
       "ro": "Design systems"
     },
+    "labels": ["Design systems"],
     "text": {
       "en": "Shared UI libraries used across several products and teams.",
       "ro": "Biblioteci UI comune, folosite de mai multe produse și echipe."
@@ -127,6 +139,7 @@ export const experience: Role[] = [
     "to": null,
     "role": "Full Stack Engineer",
     "type": "contract",
+    "labels": [{ "en": "CSP nonces · SSRF", "ro": "CSP cu nonce · SSRF" }],
     "text": {
       "en": "Pentest fixes across repos (per-request CSP nonces, SSRF hardening, reworked session invalidation), attack-path graphs, integration APIs, an AWS setup wizard, stricter types to get ready for the React Compiler, and a new app shell with a command palette.",
       "ro": "Fix-uri după pentest în mai multe repo-uri (CSP cu nonce per request, protecție SSRF, altă logică de invalidare a sesiunilor), grafuri cu căile de atac, API-uri de integrare, un wizard de configurare pentru AWS, tipuri mai stricte ca să putem trece pe React Compiler și o interfață nouă pentru aplicație, cu command palette."
@@ -138,6 +151,7 @@ export const experience: Role[] = [
     "from": 2023,
     "to": 2026,
     "role": "Senior Frontend Engineer",
+    "labels": ["Vue 2 → Vue 3 → Next.js"],
     "text": {
       "en": "Vivre’s migration plan to Next.js: Vue 3 first, with the logic moved into composables so it could later be ported without a rewrite; a ride-sharing website from scratch, BestJobs on the App Router, design system components and technical SEO.",
       "ro": "Planul de migrare al Vivre spre Next.js: întâi pe Vue 3, cu logica scoasă în composables, ca s-o putem muta apoi fără s-o rescriem; un site de ride-sharing de la zero, BestJobs pe App Router, componente de design system și SEO tehnic."
@@ -149,6 +163,7 @@ export const experience: Role[] = [
     "from": 2018,
     "to": 2023,
     "role": "Senior Frontend Engineer",
+    "labels": ["Core Web Vitals"],
     "text": {
       "en": "Led the storefront migration and the performance work after it, coordinated the external React Native team and mentored junior developers.",
       "ro": "Am condus migrarea magazinului și optimizările de performanță care au urmat, am coordonat echipa externă de React Native și am fost mentor pentru juniori."
@@ -181,6 +196,7 @@ export const experience: Role[] = [
     "to": 2017,
     "role": "Senior Frontend Developer",
     "type": "volunteer",
+    "labels": ["ROdiaspora"],
     "text": {
       "en": "Web and mobile apps published on the organization’s GitHub, among them ROdiaspora, an Angular mobile app.",
       "ro": "Aplicații web și mobile publicate pe GitHub-ul organizației, printre care ROdiaspora, o aplicație mobilă în Angular."
@@ -254,6 +270,7 @@ export const experience: Role[] = [
     "from": 2005,
     "to": 2008,
     "role": "Frontend Developer",
+    "labels": ["worldclass.ro"],
     "text": {
       "en": "worldclass.ro and many hospital websites.",
       "ro": "worldclass.ro și multe site-uri de spitale."
@@ -281,6 +298,7 @@ export const recent: Recent[] = [
   {
     "id": "culte-gov-ro",
     "name": "culte.gov.ro",
+    "labels": ["culte.gov.ro"],
     "href": "https://culte.gov.ro/",
     "year": 2026,
     "client": {
@@ -301,6 +319,7 @@ export const recent: Recent[] = [
   },
   {
     "id": "school-principals-competition-platform",
+    "labels": [{ "en": "~90k documents", "ro": "~90k de documente" }],
     "name": "concursdirectori.edu.ro",
     "href": "https://concursdirectori.edu.ro/",
     "year": 2026,
@@ -325,6 +344,7 @@ export const recent: Recent[] = [
   {
     "id": "basilica-ro",
     "name": "basilica.ro",
+    "labels": ["basilica.ro"],
     "href": "https://basilica.ro/",
     "year": 2026,
     "client": {
@@ -378,7 +398,7 @@ export const earlier: Site[] = [
   { name: "revistavip.net", year: 2008, about: { en: "VIP, a celebrity magazine", ro: "Site-ul revistei mondene VIP" }, skills: ["html", "css"] },
   { name: "americanexperience.ro", href: "https://www.americanexperience.ro/", year: 2008, about: { en: "Agency for Work & Travel USA, H2B and Au Pair programs", ro: "Agenție pentru programe Work & Travel USA, H2B și Au Pair" }, skills: ["html", "css"] },
   { name: "turabo-cafe.ro", year: 2008, about: { en: "Turabo Cafe, a coffee chain", ro: "Site-ul cafenelelor Turabo Cafe" }, skills: ["html", "css"] },
-  { name: "bmw.ro", featured: true, href: "https://www.bmw.ro/", year: 2008, about: { en: "Official site of BMW Romania, built in Flash with XML content", ro: "Site-ul oficial BMW România, în Flash, cu conținut din XML" }, skills: ["xml", "html", "flash"] },
+  { name: "bmw.ro", featured: true, labels: ["bmw.ro"], href: "https://www.bmw.ro/", year: 2008, about: { en: "Official site of BMW Romania, built in Flash with XML content", ro: "Site-ul oficial BMW România, în Flash, cu conținut din XML" }, skills: ["xml", "html", "flash"] },
   { name: "vibefm.ro", href: "https://vibefm.ro/", year: 2008, about: { en: "Vibe FM, a dance-music radio network", ro: "Site-ul Vibe FM, rețea de radio cu muzică dance" }, skills: ["html", "css"] },
   { name: "sportlaminut.ro", year: 2009, about: { en: "Sports news, mostly football", ro: "Știri sportive, mai ales fotbal" }, skills: ["html", "css"] },
   { name: "creativeweek.org", year: 2009, about: { en: "A web designer’s blog and portfolio", ro: "Blogul și portofoliul unui web designer" }, skills: ["wordpress", "php", "html", "css"] },
@@ -423,7 +443,7 @@ export const earlier: Site[] = [
   { name: "suntmamica.ro", href: "https://www.suntmamica.ro/", year: 2016, about: { en: "Parenting site and community for mothers", ro: "Site și comunitate pentru mame" }, skills: ["html", "php", "css", "sass", "bootstrap", "jQuery", "javascript", "nodejs", "gulp", "git"] },
   { name: "gobet.ro", year: 2016, about: { en: "GOBet, a sports betting operator", ro: "Site-ul casei de pariuri GOBet" }, skills: ["html", "css", "sass", "bootstrap", "jQuery", "javascript", "nodejs", "gulp"] },
   { name: "basilica.ro", href: "https://basilica.ro/", year: 2016, about: { en: "News agency of the Romanian Patriarchate", ro: "Agenția de știri a Patriarhiei Române" }, skills: ["wordpress", "php", "html", "css", "sass", "bootstrap", "jQuery", "javascript", "vagrant", "nodejs", "gulp", "git"] },
-  { name: "digi24.ro", featured: true, href: "https://www.digi24.ro/", year: 2016, about: { en: "Mobile and desktop sites for the Digi24 news channel", ro: "Site-ul televiziunii de știri Digi24, mobil și desktop" }, skills: ["html", "css", "sass", "bootstrap", "jQuery", "javascript", "nodejs", "gulp", "git"] },
+  { name: "digi24.ro", featured: true, labels: ["digi24.ro"], href: "https://www.digi24.ro/", year: 2016, about: { en: "Mobile and desktop sites for the Digi24 news channel", ro: "Site-ul televiziunii de știri Digi24, mobil și desktop" }, skills: ["html", "css", "sass", "bootstrap", "jQuery", "javascript", "nodejs", "gulp", "git"] },
   { name: "kanald.ro", featured: true, href: "https://www.kanald.ro/", year: 2017, about: { en: "Kanal D, a TV channel", ro: "Site-ul televiziunii Kanal D" }, skills: ["html", "css", "sass", "bootstrap", "javascript", "nodejs", "gulp", "vagrant", "git"] },
   { name: "gaseste.ro", href: "https://www.gaseste.ro/", year: 2017, about: { en: "Marketplace for local service providers", ro: "Platformă pentru servicii locale" }, skills: ["php", "html", "css", "sass", "bootstrap", "jQuery", "javascript", "nodejs", "gulp", "vagrant", "git", "PM"] },
   { name: "vreaudeviz.ro", year: 2017, about: { en: "Online quotes for home renovation", ro: "Devize online pentru renovări" }, skills: ["html", "css", "sass", "bootstrap", "vue.js", "javascript", "nodejs", "gulp"] },

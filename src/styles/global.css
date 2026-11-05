@@ -96,6 +96,167 @@
   z-index: 1;
 }
 
+/* Particle background: clusters on #bg, leader lines on #lines and clickable labels in #tags, all under the page
+   content, so the hero text stays on top */
+#bg,
+#lines {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+/* clipped below the sticky header by the script */
+#tags {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  overflow: hidden;
+}
+/* Where the frame lines show, labels go above them, so a frame line never crosses a label (the labels keep clear
+   of the hero text there); their lines go above the page content but stay under the sticky header */
+@media (min-width: 72rem) {
+  #lines {
+    z-index: 2;
+  }
+  #tags {
+    z-index: 22;
+  }
+}
+/* Clicks pass through empty space and the hatched bands to the labels behind: the sections take them, and in
+   the hero only its lines do, each as wide as its text */
+main,
+main > div,
+#top,
+.hatch {
+  pointer-events: none;
+}
+main > div > *,
+#top > * {
+  pointer-events: auto;
+}
+#top > * {
+  width: fit-content;
+}
+.tag {
+  position: absolute;
+  left: 0;
+  top: 0;
+  display: block;
+  white-space: nowrap;
+  padding: 0.35rem 0.6rem;
+  border: 1px solid var(--line);
+  border-radius: 3px;
+  background: var(--surface);
+  color: var(--fg);
+  font: 500 0.75rem/1 var(--font-mono);
+  opacity: 0;
+  will-change: transform, opacity;
+  pointer-events: auto;
+  cursor: pointer;
+  text-decoration: none;
+  transition:
+    border-color 0.15s ease,
+    color 0.15s ease;
+}
+/* the square sits on the border facing the particle, where the leader line ends */
+.tag::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: -3px;
+  width: 5px;
+  height: 5px;
+  margin-top: -2.5px;
+  background: var(--accent);
+}
+.tag.rev::before {
+  left: auto;
+  right: -3px;
+}
+.tag:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+.tag.gone {
+  pointer-events: none;
+}
+:root.grab {
+  cursor: grab;
+}
+:root.dragging,
+:root.dragging * {
+  cursor: grabbing !important;
+  user-select: none;
+  -webkit-user-select: none;
+}
+/* The row or section a click led to lights up once. The band is a pseudo-element, so its animation does not
+   replace the row's own .reveal animation. */
+@keyframes flash {
+  0% {
+    opacity: 0;
+  }
+  20%,
+  45% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+/* with reduced motion: the highlight is there at once, then fades */
+@keyframes flash-calm {
+  0%,
+  60% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+.flash {
+  position: relative;
+  isolation: isolate;
+}
+/* A section's band fills its box, out to the hatched bands 4rem above and below. The box-shadow carries it
+   sideways to the frame lines or the screen edge: a shadow takes no space, so the page never scrolls sideways. */
+.flash::after {
+  --pad: max(16px, (100vw - 64rem) / 2);
+  --tint: color-mix(in srgb, var(--accent) 8%, transparent);
+  content: '';
+  position: absolute;
+  inset: calc(-4rem - 1px) 0;
+  z-index: -1;
+  background: var(--tint);
+  box-shadow: 0 0 0 100vmax var(--tint);
+  clip-path: inset(0 calc(-1 * var(--pad)));
+  opacity: 0;
+  pointer-events: none;
+}
+/* a row's band runs from the line above it to the line below */
+li.flash::after {
+  inset: -1px 0;
+}
+@media (min-width: 72rem) {
+  .flash::after {
+    --pad: 2rem;
+  }
+}
+/* .flash only places the band, so the script can measure it before scrolling; .flashing lights it up */
+.flash.flashing::after {
+  animation: flash 1.4s ease-in-out;
+}
+@media (prefers-reduced-motion: reduce) {
+  :root:not([data-motion='full']) .flash.flashing::after {
+    animation: flash-calm 1.6s ease-out !important;
+  }
+}
+:root[data-motion='reduce'] .flash.flashing::after {
+  animation: flash-calm 1.6s ease-out !important;
+}
+
 /* Side gutter that also clears a phone's side safe area */
 .gutter {
   padding-left: max(16px, env(safe-area-inset-left, 0px));

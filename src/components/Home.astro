@@ -10,6 +10,7 @@ import Projects from './Projects.astro';
 import Contact from './Contact.astro';
 import Footer from './Footer.astro';
 import DisplayPrefs from './DisplayPrefs.astro';
+import Particles from './Particles.astro';
 import type { Lang } from '../data/content';
 
 interface Props {
@@ -20,6 +21,7 @@ const { lang } = Astro.props;
 ---
 
 <Base lang={lang}>
+  <Particles lang={lang} />
   <Header lang={lang}>
     <DisplayPrefs lang={lang} />
   </Header>
@@ -42,3 +44,9 @@ const { lang } = Astro.props;
   </main>
   <Footer />
 </Base>
+
+<script>
+  import { initJumpLinks } from '../scripts/jump';
+
+  initJumpLinks();
+</script>

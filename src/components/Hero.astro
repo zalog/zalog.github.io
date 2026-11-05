@@ -12,7 +12,7 @@ const t = useT(lang);
 
 <section
   id="top"
-  class="flex flex-col justify-center pb-4 pt-20 sm:pt-28 lg:min-h-[calc(100svh-12rem)] lg:pt-20"
+  class="flex flex-col justify-center pb-4 pt-28 lg:min-h-[calc(100svh-12rem)] lg:pt-20"
   aria-labelledby="hero-title"
 >
   <p class="mb-4 font-mono text-sm text-muted" data-role>{profile.role} · {profile.city[lang]}</p>
@@ -21,7 +21,7 @@ const t = useT(lang);
   <p class="mt-4 max-w-[38rem] text-muted">{t('intro2')}</p>
   <p class="mt-8 font-mono text-xs text-muted">{[...profile.stack, t('remote')].join(' · ')}</p>
   <p class="mt-8 flex flex-wrap gap-3 font-mono text-sm">
-    <a class="bracket bg-surface" href="#contact"><span>{t('getInTouch')}</span><span class="arrow" aria-hidden="true">↗</span></a>
-    <a class="bracket" href="#experience"><span>{t('seeExperience')}</span><span class="arrow arrow-down" aria-hidden="true">↓</span></a>
+    <a class="bracket bg-surface" href="#contact" data-jump><span>{t('getInTouch')}</span><span class="arrow" aria-hidden="true">↗</span></a>
+    <a class="bracket" href="#experience" data-jump><span>{t('seeExperience')}</span><span class="arrow arrow-down" aria-hidden="true">↓</span></a>
   </p>
 </section>

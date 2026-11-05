@@ -14,8 +14,8 @@ const t = useT(lang);
   <h2 id="results-title" class="mb-6 text-2xl font-semibold tracking-tight">{t('resultsTitle')}</h2>
   <ul class="border-t border-line">
     {
-      results.map((r, i) => (
-        <li id={`res-${i}`} class="reveal grid gap-x-8 gap-y-1 border-b border-line py-4 last:border-b-0 sm:grid-cols-[8rem_1fr]">
+      results.map((r) => (
+        <li id={`res-${r.id}`} class="reveal grid gap-x-8 gap-y-1 border-b border-line py-4 last:border-b-0 sm:grid-cols-[8rem_1fr]">
           <p class="font-mono text-lg font-medium tabular-nums sm:pt-0.5 sm:text-base">{pick(r.key, lang)}</p>
           <div class="min-w-0">
             <p class="max-w-[44rem]">{r.text[lang]}</p>

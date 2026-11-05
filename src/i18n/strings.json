@@ -59,7 +59,8 @@
     "viewMore": "Show more",
     "volunteer": "volunteer",
     "writeMe": "Email",
-    "xlarge": "Extra large"
+    "xlarge": "Extra large",
+    "yearsOnWeb": "{web} years on the web"
   },
   "ro": {
     "all": "Toate",
@@ -121,6 +122,7 @@
     "viewMore": "Vezi mai multe",
     "volunteer": "voluntar",
     "writeMe": "Scrie-mi",
-    "xlarge": "Foarte mare"
+    "xlarge": "Foarte mare",
+    "yearsOnWeb": "{web} de ani pe web"
   }
 }
