@@ -125,7 +125,24 @@
 .sticky-head.scrolled {
   border-bottom-color: var(--line);
 }
-/* Header nav: as far from the logo as the logo is from the frame line or the screen edge */
+/* Scroll-driven, so the line is right in the first frame after a reload; Header.astro covers browsers without it.
+   Longhands: the minifier merges a shorthand and a timeline into one `animation`, which Chrome rejects */
+@keyframes head-line {
+  to {
+    border-bottom-color: var(--line);
+  }
+}
+@supports (animation-timeline: scroll()) {
+  .sticky-head {
+    animation-name: head-line;
+    animation-timing-function: linear;
+    animation-fill-mode: both;
+    animation-timeline: scroll();
+    animation-range: 0 8px;
+  }
+}
+/* Header nav: at the top it is as far from the logo as the logo is from the frame line or the screen edge.
+   From sm up it slides to the text column of the rows (10rem in) while #results comes up under the header */
 .sticky-head {
   --edge: max(16px, env(safe-area-inset-left, 0px), (100vw - 64rem) / 2);
 }
@@ -137,6 +154,28 @@
 /* minus the 1rem flex gap and the link's 0.375rem padding, so the gap is measured to the text */
 .head-nav {
   margin-left: calc(var(--edge) - 1.375rem);
+}
+@keyframes nav-align {
+  to {
+    transform: translateX(calc(10rem - 34px - var(--edge)));
+  }
+}
+@supports (animation-timeline: view()) {
+  @media (min-width: 40rem) {
+    :root {
+      timeline-scope: --results;
+    }
+    #results {
+      view-timeline-name: --results;
+    }
+    .head-nav {
+      animation-name: nav-align;
+      animation-timing-function: ease-in-out;
+      animation-fill-mode: both;
+      animation-timeline: --results;
+      animation-range: cover calc(100vh - 14rem) cover calc(100vh - 6rem);
+    }
+  }
 }
 body::before {
   content: '';
@@ -257,6 +296,55 @@ body::before {
 }
 details[open] .caret {
   transform: rotate(90deg);
+}
+
+/* Approach statement: without JavaScript every word is lit; the script dims them and lights them on scroll */
+.statement .w {
+  color: var(--fg);
+}
+.statement .w.acc {
+  color: var(--accent);
+}
+.statement.armed .w {
+  color: color-mix(in srgb, var(--fg) 28%, var(--bg));
+  transition: color 0.35s ease;
+}
+.statement.armed .w.lit {
+  color: var(--fg);
+}
+.statement.armed .w.acc.lit {
+  color: var(--accent);
+}
+
+/* Rows ease in as they enter the viewport; longhands for the same reason as the header line */
+@keyframes reveal {
+  from {
+    opacity: 0;
+    transform: translateY(1.25rem);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@supports (animation-timeline: view()) {
+  .reveal {
+    animation-name: reveal;
+    animation-timing-function: linear;
+    animation-fill-mode: both;
+    animation-timeline: view();
+    animation-range: entry 0% entry 70%;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  :root:not([data-motion='full']) .reveal,
+  :root:not([data-motion='full']) .head-nav {
+    animation: none !important;
+  }
+}
+:root[data-motion='reduce'] .reveal,
+:root[data-motion='reduce'] .head-nav {
+  animation: none !important;
 }
 
 /* Text size preference: everything is in rem, so the whole page scales */
