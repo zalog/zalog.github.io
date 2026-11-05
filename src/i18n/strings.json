@@ -8,6 +8,8 @@
     "contactLead": "I work remotely with EU and US teams, and in Bucharest also hybrid or on site.",
     "contactTitle": "Contact",
     "contract": "B2B contract",
+    "copied": "Copied",
+    "copy": "Copy",
     "dark": "Dark",
     "display": "Display",
     "displayTitle": "Display settings",
@@ -54,6 +56,7 @@
     "viewLess": "View less",
     "viewMore": "View more",
     "volunteer": "volunteer",
+    "writeMe": "Write to me",
     "xlarge": "Extra large"
   },
   "ro": {
@@ -65,6 +68,8 @@
     "contactLead": "Lucrez remote cu echipe din UE și din SUA, iar în București și hibrid sau la birou.",
     "contactTitle": "Contact",
     "contract": "contract B2B",
+    "copied": "Copiat",
+    "copy": "Copiază",
     "dark": "Întunecată",
     "display": "Afișare",
     "displayTitle": "Setări de afișare",
@@ -111,6 +116,7 @@
     "viewLess": "Vezi mai puține",
     "viewMore": "Vezi mai multe",
     "volunteer": "voluntar",
+    "writeMe": "Scrie-mi",
     "xlarge": "Foarte mare"
   }
 }
