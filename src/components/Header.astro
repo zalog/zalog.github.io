@@ -66,3 +66,16 @@ const languages: { code: Lang; label: string }[] = [
     mark();
   })();
 </script>
+
+<script>
+  // Remember a language picked here, so the redirect on zalog.ro/ respects it next time
+  document.querySelectorAll<HTMLAnchorElement>('a[data-lang]').forEach((a) =>
+    a.addEventListener('click', () => {
+      try {
+        localStorage.setItem('pref-lang', a.dataset.lang ?? '');
+      } catch {
+        /* storage blocked: the browser language decides */
+      }
+    }),
+  );
+</script>
