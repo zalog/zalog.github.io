@@ -30,6 +30,18 @@ const canonical = getAbsoluteLocaleUrl(lang, '');
     <meta name="description" content={t('metaDescription', years)} />
     <link rel="canonical" href={canonical} />
     <link rel="icon" href="/favicon.ico" sizes="any" />
+    <script is:inline>
+      // Apply saved display settings before first paint, so there is no flash of the wrong theme or size
+      (function () {
+        var d = document.documentElement;
+        var get = function (k) { try { return localStorage.getItem(k); } catch (e) { return null; } };
+        var t = get('pref-theme'); if (t === 'light' || t === 'dark') d.setAttribute('data-theme', t);
+        var m = get('pref-motion'); if (m === 'full' || m === 'reduce') d.setAttribute('data-motion', m);
+        var s = get('pref-text'); if (s === 'sm' || s === 'lg' || s === 'xl') d.setAttribute('data-text', s);
+        // the Display button shows only where its panel can open, and from the first paint so the header never shifts
+        if ('popover' in HTMLElement.prototype) d.setAttribute('data-popover', '');
+      })();
+    </script>
     <slot name="head" />
   </head>
   <body>

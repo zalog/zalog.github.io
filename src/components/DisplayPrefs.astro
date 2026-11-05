@@ -1,0 +1,70 @@
+---
+import type { Lang } from '../data/content';
+import { useT } from '../i18n';
+
+interface Props {
+  lang: Lang;
+}
+
+const { lang } = Astro.props;
+const t = useT(lang);
+const groups = [
+  { name: 'theme', legend: t('theme'), options: [['system', t('auto')], ['light', t('light')], ['dark', t('dark')]] },
+  { name: 'motion', legend: t('motion'), options: [['system', t('auto')], ['full', t('on')], ['reduce', t('reduced')]] },
+] as const;
+const sizes = [
+  ['sm', 'A−', t('small')],
+  ['md', 'A', t('normal')],
+  ['lg', 'A+', t('large')],
+  ['xl', 'A++', t('xlarge')],
+] as const;
+---
+
+{/* shown by the layout's inline script (data-popover): without JavaScript the button would do nothing */}
+<button id="prefs-btn" type="button" popovertarget="prefs" class="hidden items-center gap-1.5 rounded-md [[data-popover]_&]:flex border border-line px-2.5 py-1.5 text-sm hover:border-muted">
+  <svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5">
+    <circle cx="8" cy="8" r="6.25"></circle>
+    <path d="M8 1.75a6.25 6.25 0 0 1 0 12.5z" fill="currentColor"></path>
+  </svg>
+  <span class="sr-only sm:not-sr-only">{t('display')}</span>
+</button>
+{/* A popover renders in the browser's top layer, above the sticky header and the frame lines; it
+    also closes on Escape and on a click outside without any script */}
+<div id="prefs" popover class="prefs w-[min(18rem,calc(100vw-32px))] rounded-lg border border-line bg-surface p-4 text-fg shadow-lg shadow-black/5" role="region" aria-labelledby="prefs-title">
+  <h2 id="prefs-title" class="mb-3 text-sm font-semibold">{t('displayTitle')}</h2>
+  <div class="grid gap-4">
+    {
+      groups.map((g) => (
+        <fieldset>
+          <legend class="mb-1.5 font-mono text-xs text-muted">{g.legend}</legend>
+          <div class="seg">
+            {g.options.map(([value, label]) => (
+              <label>
+                <input type="radio" name={g.name} id={`${g.name}-${value}`} value={value} />
+                <span>{label}</span>
+              </label>
+            ))}
+          </div>
+        </fieldset>
+      ))
+    }
+    <fieldset>
+      <legend class="mb-1.5 font-mono text-xs text-muted">{t('textSize')}</legend>
+      <div class="seg">
+        {
+          sizes.map(([value, mark, label]) => (
+            <label>
+              <input type="radio" name="text" id={`text-${value}`} value={value} aria-label={label} />
+              <span aria-hidden="true">{mark}</span>
+            </label>
+          ))
+        }
+      </div>
+    </fieldset>
+  </div>
+</div>
+
+<script>
+  import { initDisplayPrefs } from '../scripts/display';
+  initDisplayPrefs();
+</script>

@@ -23,6 +23,9 @@
     color-scheme: dark;
   }
 }
+:root[data-theme='light'] {
+  color-scheme: light;
+}
 :root[data-theme='dark'] {
   --bg: #0e1115;
   --surface: #161a20;
@@ -216,15 +219,89 @@ details[open] .caret {
   transform: rotate(90deg);
 }
 
+/* Text size preference: everything is in rem, so the whole page scales */
+:root[data-text='sm'] {
+  font-size: 87.5%;
+}
+:root[data-text='lg'] {
+  font-size: 112.5%;
+}
+:root[data-text='xl'] {
+  font-size: 125%;
+}
+
+/* Motion preference: "Auto" follows the OS, "Reduced" always wins, "On" overrides the OS */
 @media (prefers-reduced-motion: reduce) {
-  html {
+  :root:not([data-motion='full']) {
     scroll-behavior: auto;
   }
-  *,
-  *::before,
-  *::after {
+  :root:not([data-motion='full']) *,
+  :root:not([data-motion='full']) *::before,
+  :root:not([data-motion='full']) *::after {
     animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
   }
+}
+:root[data-motion='reduce'] {
+  scroll-behavior: auto;
+}
+:root[data-motion='reduce'] *,
+:root[data-motion='reduce'] *::before,
+:root[data-motion='reduce'] *::after {
+  animation-duration: 0.01ms !important;
+  animation-iteration-count: 1 !important;
+  transition-duration: 0.01ms !important;
+}
+
+/* Display panel: a popover, positioned under its button by the script */
+.prefs[popover] {
+  position: fixed;
+  inset: auto;
+  margin: 0;
+}
+/* browsers without popovers would draw it open; keep it hidden there from the first paint */
+@supports not selector(:popover-open) {
+  .prefs {
+    display: none;
+  }
+}
+
+/* Segmented radio controls in the Display panel */
+.seg {
+  display: flex;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 3px;
+  gap: 3px;
+}
+.seg label {
+  flex: 1;
+  position: relative;
+}
+.seg input {
+  position: absolute;
+  opacity: 0;
+  inset: 0;
+  margin: 0;
+  cursor: pointer;
+}
+.seg span {
+  display: block;
+  text-align: center;
+  padding: 0.3rem 0.5rem;
+  border-radius: 5px;
+  font-size: 0.8125rem;
+  color: var(--muted);
+  transition:
+    background-color 0.15s,
+    color 0.15s;
+}
+.seg input:checked + span {
+  background: var(--fg);
+  color: var(--bg);
+}
+.seg input:focus-visible + span {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
 }
