@@ -28,8 +28,8 @@ const sizes = [
   </svg>
   <span class="sr-only sm:not-sr-only">{t('display')}</span>
 </button>
-{/* A popover renders in the browser's top layer, above the sticky header and the frame lines; it
-    also closes on Escape and on a click outside without any script */}
+{/* A popover renders in the browser's top layer, above the sticky header, the frame lines and the
+    particle labels; it also closes on Escape and on a click outside without any script */}
 <div id="prefs" popover class="prefs w-[min(18rem,calc(100vw-32px))] rounded-lg border border-line bg-surface p-4 text-fg shadow-lg shadow-black/5" role="region" aria-labelledby="prefs-title">
   <h2 id="prefs-title" class="mb-3 text-sm font-semibold">{t('displayTitle')}</h2>
   <div class="grid gap-4">

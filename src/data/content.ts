@@ -2,12 +2,15 @@
 export type Lang = "en" | "ro";
 export type Localized = Record<Lang, string>;
 
-/** `id` is the row's anchor (#exp- or #proj-<id>) */
-export interface Result { key: string | Localized; where: string | Localized; text: Localized }
-export interface Focus { title: string | Localized; text: Localized }
-export interface Role { id: string; company: string | Localized; from: number; to: number | null; role: string; type?: "parttime" | "volunteer" | "freelance" | "contract" | "intern"; text?: Localized }
+/** Labels shown on the particle background; each one links to the row it belongs to */
+export type Labels = (string | Localized)[];
+
+/** `id` is the row's anchor (#res-, #exp- or #proj-<id>) */
+export interface Result { id: string; key: string | Localized; where: string | Localized; text: Localized; labels?: Labels }
+export interface Focus { title: string | Localized; text: Localized; labels?: Labels }
+export interface Role { id: string; company: string | Localized; from: number; to: number | null; role: string; type?: "parttime" | "volunteer" | "freelance" | "contract" | "intern"; text?: Localized; labels?: Labels }
 export interface Recent { id: string; name: string | Localized; href?: string; year: number; client: Localized; stack: string[]; text: Localized }
-/** Without `href` the site is offline; `featured` sites are named in the intro of "Earlier projects" */
+/** Without `href` the site is offline; `featured` sites are named in the intro of "Earlier projects" and on the particle background */
 export interface Site { name: string; href?: string; skills: string[]; year: number; about: Localized; featured?: boolean }
 
 /** Who the site is about. The email is kept in two parts, so no file holds the address as text. */
@@ -26,6 +29,8 @@ export const years = { web: thisYear - 2002, react: thisYear - 2018 };
 
 export const results: Result[] = [
   {
+    "id": "vivre-migration",
+    "labels": [{ "en": "~60k concurrent users", "ro": "~60k utilizatori simultani" }, "PageSpeed 15 → 90"],
     "key": {
       "en": "4 mo",
       "ro": "4 luni"
@@ -37,6 +42,7 @@ export const results: Result[] = [
     }
   },
   {
+    "id": "school-principals",
     "key": {
       "en": "~6,900",
       "ro": "~6.900"
@@ -51,6 +57,8 @@ export const results: Result[] = [
     }
   },
   {
+    "id": "vue-to-next",
+    "labels": ["Vue 2 → Vue 3 → Next.js"],
     "key": "Vue → Next",
     "where": "Neogen",
     "text": {
@@ -59,6 +67,8 @@ export const results: Result[] = [
     }
   },
   {
+    "id": "pentest",
+    "labels": [{ "en": "CSP nonces · SSRF", "ro": "CSP cu nonce · SSRF" }],
     "key": "CSP · SSRF",
     "where": "Defendermate",
     "text": {
@@ -67,6 +77,7 @@ export const results: Result[] = [
     }
   },
   {
+    "id": "bootstrap",
     "key": "44",
     "where": "Bootstrap",
     "text": {
@@ -75,6 +86,7 @@ export const results: Result[] = [
     }
   },
   {
+    "id": "placeholder-loading",
     "key": "~20k",
     "where": "placeholder-loading",
     "text": {
@@ -87,6 +99,7 @@ export const results: Result[] = [
 export const focus: Focus[] = [
   {
     "title": profile.stack.join(" · "),
+    "labels": [profile.stack.slice(0, 3).join(" · "), "SSR · ISR"],
     "text": {
       "en": "Component systems, SSR and ISR, performance budgets.",
       "ro": "Sisteme de componente, SSR și ISR, bugete de performanță."
@@ -97,6 +110,7 @@ export const focus: Focus[] = [
       "en": "Design systems",
       "ro": "Design systems"
     },
+    "labels": ["Design systems"],
     "text": {
       "en": "Shared UI libraries used across several products and teams.",
       "ro": "Biblioteci UI comune, folosite de mai multe produse și echipe."
@@ -169,6 +183,7 @@ export const experience: Role[] = [
     "from": 2018,
     "to": 2023,
     "role": "Senior Frontend Engineer",
+    "labels": ["Core Web Vitals"],
     "text": {
       "en": "Led the storefront migration and the performance work after it, coordinated the external React Native team, mentored junior developers.",
       "ro": "Am condus migrarea magazinului și optimizările de performanță care au urmat, am coordonat echipa externă de React Native, am fost mentor pentru juniori."

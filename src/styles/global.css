@@ -89,6 +89,94 @@
   z-index: 1;
 }
 
+/* Particle background: clusters on #bg, leader lines on #lines, clickable labels in #tags (all under the content) */
+#bg,
+#lines {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+#bg {
+  z-index: 0;
+}
+#lines {
+  z-index: 2;
+}
+/* above the frame lines (21) so a line never crosses a label; clipped below the sticky header by the script */
+#tags {
+  position: fixed;
+  inset: 0;
+  z-index: 22;
+  pointer-events: none;
+  overflow: hidden;
+}
+.tag {
+  position: absolute;
+  left: 0;
+  top: 0;
+  display: block;
+  white-space: nowrap;
+  padding: 0.35rem 0.6rem;
+  border: 1px solid var(--line);
+  border-radius: 3px;
+  background: var(--surface);
+  color: var(--fg);
+  font: 500 0.75rem/1 var(--font-mono);
+  opacity: 0;
+  will-change: transform, opacity;
+  pointer-events: auto;
+  cursor: pointer;
+  text-decoration: none;
+  transition:
+    border-color 0.15s ease,
+    color 0.15s ease;
+}
+/* the square sits on the border facing the particle, where the leader line ends */
+.tag::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: -3px;
+  width: 5px;
+  height: 5px;
+  margin-top: -2.5px;
+  background: var(--accent);
+}
+.tag.rev::before {
+  left: auto;
+  right: -3px;
+}
+.tag:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+.tag.gone {
+  pointer-events: none;
+}
+:root.grab {
+  cursor: grab;
+}
+:root.dragging,
+:root.dragging * {
+  cursor: grabbing !important;
+  user-select: none;
+  -webkit-user-select: none;
+}
+/* brief highlight on the row a label jumped to */
+@keyframes flash {
+  from {
+    background: color-mix(in srgb, var(--accent) 14%, transparent);
+  }
+  to {
+    background: transparent;
+  }
+}
+.flash {
+  animation: flash 1.6s ease-out;
+}
+
 /* Side gutter that also clears a phone's side safe area */
 .gutter {
   padding-left: max(16px, env(safe-area-inset-left, 0px));
