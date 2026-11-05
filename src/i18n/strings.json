@@ -1,5 +1,6 @@
 {
   "en": {
+    "all": "All",
     "approach": "Approach",
     "archiveIntro": "Projects I built or worked on, mostly for Romanian publishers, TV stations and brands, among them {sites}. Some are offline or have been redesigned since.",
     "archiveTitle": "Earlier projects",
@@ -17,6 +18,7 @@
     "experienceEarlierTitle": "Earlier experience",
     "experienceMeta": "{since} → present",
     "experienceTitle": "Experience",
+    "filterLabel": "Filter by technology",
     "focusTitle": "What I work on",
     "freelance": "freelance",
     "getInTouch": "Get in touch",
@@ -45,6 +47,8 @@
     "remote": "Remote · EU / US hours",
     "resultsTitle": "Selected results",
     "seeExperience": "See experience",
+    "shown": "{n} projects shown",
+    "shownOther": "{n} projects shown",
     "side": "On the side I work on real-time object detection for edge devices, with Python, OpenCV and YOLO. So when I build the interface of an AI product, I also know what runs behind it.",
     "skip": "Skip to content",
     "small": "Small",
@@ -58,6 +62,7 @@
     "xlarge": "Extra large"
   },
   "ro": {
+    "all": "Toate",
     "approach": "Abordare",
     "archiveIntro": "Proiecte pe care le-am făcut sau la care am lucrat, mai ales pentru publicații, televiziuni și branduri din România, printre care {sites}. Unele nu mai sunt online sau au fost refăcute între timp.",
     "archiveTitle": "Proiecte mai vechi",
@@ -75,6 +80,7 @@
     "experienceEarlierTitle": "Experiență anterioară",
     "experienceMeta": "{since} → azi",
     "experienceTitle": "Experiență",
+    "filterLabel": "Filtrează după tehnologie",
     "focusTitle": "Cu ce lucrez",
     "freelance": "freelance",
     "getInTouch": "Hai să vorbim",
@@ -103,6 +109,8 @@
     "remote": "Remote · program UE / SUA",
     "resultsTitle": "Rezultate",
     "seeExperience": "Vezi experiența",
+    "shown": "{n} proiecte afișate",
+    "shownOther": "{n} de proiecte afișate",
     "side": "În timpul liber lucrez la detecție de obiecte în timp real pe dispozitive edge, cu Python, OpenCV și YOLO. Așa că, atunci când fac interfața unui produs AI, știu și ce rulează în spatele ei.",
     "skip": "Sari la conținut",
     "small": "Mic",
