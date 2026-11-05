@@ -1,5 +1,6 @@
 {
   "en": {
+    "all": "All",
     "approach": "Approach",
     "archiveIntro": "Projects I built or worked on, mostly for Romanian publishers, TV stations and brands, among them {sites}. Some are offline or have been redesigned since.",
     "archiveTitle": "Earlier projects",
@@ -18,6 +19,7 @@
     "experienceEarlierTitle": "Earlier experience",
     "experienceMeta": "{since} → today",
     "experienceTitle": "Experience",
+    "filterLabel": "Filter by technology",
     "focusTitle": "What I work on",
     "freelance": "freelance",
     "getInTouch": "Get in touch",
@@ -47,6 +49,8 @@
     "remote": "Remote · EU / US hours",
     "resultsTitle": "Selected results",
     "seeExperience": "See experience",
+    "shown": "{n} projects shown",
+    "shownOther": "{n} projects shown",
     "side": "On the side I build real-time object detection for edge devices with Python, OpenCV and YOLO, which is why I’m comfortable designing interfaces on top of models.",
     "skip": "Skip to content",
     "small": "Small",
@@ -60,6 +64,7 @@
     "xlarge": "Extra large"
   },
   "ro": {
+    "all": "Toate",
     "approach": "Abordare",
     "archiveIntro": "Proiecte pe care le-am construit sau la care am lucrat, mai ales pentru publicații, televiziuni și branduri din România, printre care {sites}. Unele nu mai sunt online sau au fost refăcute între timp.",
     "archiveTitle": "Proiecte mai vechi",
@@ -78,6 +83,7 @@
     "experienceEarlierTitle": "Experiență anterioară",
     "experienceMeta": "{since} → azi",
     "experienceTitle": "Experiență",
+    "filterLabel": "Filtrează după tehnologie",
     "focusTitle": "Cu ce lucrez",
     "freelance": "freelance",
     "getInTouch": "Hai să vorbim",
@@ -107,6 +113,8 @@
     "remote": "Remote · program UE / SUA",
     "resultsTitle": "Rezultate",
     "seeExperience": "Vezi experiența",
+    "shown": "{n} proiecte afișate",
+    "shownOther": "{n} de proiecte afișate",
     "side": "În timpul liber lucrez la detecția de obiecte în timp real pe dispozitive edge, cu Python, OpenCV și YOLO, așa că știu să construiesc interfețe pentru produse bazate pe modele AI.",
     "skip": "Sari la conținut",
     "small": "Mic",
