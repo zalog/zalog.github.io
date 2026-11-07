@@ -1,0 +1,48 @@
+---
+import type { Lang } from '../data/content';
+import { useT } from '../i18n';
+
+interface Props {
+  lang: Lang;
+}
+
+const { lang } = Astro.props;
+const t = useT(lang);
+// Split into words at build time; the phrase between *asterisks* is set in the accent colour.
+// A script lights the words one by one as the sentence scrolls through the viewport.
+const words = t('statement')
+  .split(/(\*[^*]+\*)/)
+  .filter(Boolean)
+  .flatMap((chunk) => {
+    const accent = chunk.startsWith('*');
+    return chunk.replaceAll('*', '').split(/\s+/).filter(Boolean).map((w) => ({ w, accent }));
+  });
+---
+
+<section id="statement" aria-label={t('approach')}>
+  <p class="statement max-w-[44rem] text-3xl leading-[1.15] font-semibold tracking-tight sm:text-5xl" data-statement>
+    {words.map(({ w, accent }, i) => <><span class:list={['w', { acc: accent }]}>{w}</span>{i < words.length - 1 && ' '}</>)}
+  </p>
+</section>
+
+<script>
+  import { motionReduced } from '../scripts/store';
+
+  const p = document.querySelector<HTMLElement>('[data-statement]');
+  if (p) {
+    const words = [...p.querySelectorAll<HTMLElement>('.w')];
+    // The first word lights as the sentence's top enters the lower 15% of the screen,
+    // the last one as its bottom passes 45% from the top
+    const update = () => {
+      const r = p.getBoundingClientRect(), vh = innerHeight;
+      const prog = motionReduced() ? 1 : (vh * 0.85 - r.top) / (r.height + vh * 0.4);
+      const lit = Math.round(Math.max(0, Math.min(1, prog)) * words.length);
+      words.forEach((w, i) => w.classList.toggle('lit', i < lit));
+    };
+    p.classList.add('armed');
+    update();
+    addEventListener('scroll', update, { passive: true });
+    addEventListener('resize', update);
+    new MutationObserver(update).observe(document.documentElement, { attributes: true, attributeFilter: ['data-motion'] });
+  }
+</script>

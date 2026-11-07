@@ -1,0 +1,50 @@
+---
+import { earlier, experience, focus, recent, results, years, type Labels, type Lang } from '../data/content';
+import { pick, slug, useT } from '../i18n';
+
+interface Props {
+  lang: Lang;
+}
+
+const { lang } = Astro.props;
+const t = useT(lang);
+
+// Labels that come out of each cluster; every one links to the row it names
+const labelled = <T extends { labels?: Labels }>(rows: T[], href: (row: T) => string) =>
+  rows.flatMap((row) => (row.labels ?? []).map((label) => ({ text: pick(label, lang), href: href(row) })));
+
+const data = {
+  top: [
+    ...labelled(focus, () => '#focus'),
+    ...labelled(results, (r) => `#res-${r.id}`),
+    ...labelled(experience, (x) => `#exp-${x.id}`),
+    { text: t('yearsOnWeb', years), href: '#experience' },
+  ],
+  experience: experience
+    .filter((x) => x.text)
+    .map((x) => ({
+      text: `${pick(x.company, lang)} · ${x.from === x.to ? x.from : `${x.from}–${x.to ?? t('present')}`}`,
+      href: `#exp-${x.id}`,
+    })),
+  projects: [
+    ...recent.map((r) => ({ text: pick(r.name, lang), href: `#proj-${r.id}` })),
+    ...earlier.filter((s) => s.featured).map((s) => ({ text: `${s.name} · ${s.year}`, href: `#site-${slug(s.name)}` })),
+  ],
+};
+---
+
+<canvas id="bg" aria-hidden="true"></canvas>
+<canvas id="lines" aria-hidden="true"></canvas>
+<div id="tags" aria-hidden="true"></div>
+{/* "<" escaped so no label can close the script element early */}
+<script type="application/json" id="particle-data" set:html={JSON.stringify(data).replaceAll('<', '\\u003c')} />
+
+<script>
+  import { initParticles, initTagLinks } from '../scripts/particles.js';
+
+  const raw = document.getElementById('particle-data')?.textContent;
+  if (raw) {
+    initParticles(JSON.parse(raw));
+    initTagLinks();
+  }
+</script>

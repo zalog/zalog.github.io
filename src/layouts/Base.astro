@@ -1,0 +1,114 @@
+---
+import '@fontsource-variable/schibsted-grotesk';
+import '@fontsource/ibm-plex-mono/400.css';
+import '@fontsource/ibm-plex-mono/500.css';
+import '../styles/global.css';
+import sansLatin from '@fontsource-variable/schibsted-grotesk/files/schibsted-grotesk-latin-wght-normal.woff2?url';
+import sansLatinExt from '@fontsource-variable/schibsted-grotesk/files/schibsted-grotesk-latin-ext-wght-normal.woff2?url';
+import { getAbsoluteLocaleUrl } from 'astro:i18n';
+import { profile, social, years, type Lang } from '../data/content';
+import { useT } from '../i18n';
+
+interface Props {
+  lang: Lang;
+  title?: string;
+  description?: string;
+  /** Pages that are not part of the site's content (the 404) are kept out of search results */
+  noindex?: boolean;
+}
+
+const { lang, noindex = false } = Astro.props;
+const t = useT(lang);
+const title = Astro.props.title ?? `${profile.name} · ${profile.role}`;
+const description = Astro.props.description ?? t('metaDescription', years);
+const url = { ro: getAbsoluteLocaleUrl('ro', ''), en: getAbsoluteLocaleUrl('en', '') };
+const ogImage = new URL('/og.png', Astro.site).href;
+const person = {
+  '@context': 'https://schema.org',
+  '@type': 'Person',
+  name: profile.name,
+  jobTitle: profile.role,
+  url: url[lang],
+  address: { '@type': 'PostalAddress', addressLocality: profile.city[lang], addressCountry: 'RO' },
+  sameAs: social.map((s) => s.href),
+};
+---
+
+<!doctype html>
+<html lang={lang}>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    {/* the first layout needs this font: with the fallback the statement is shorter, so a reload cannot restore the scroll position yet */}
+    <link rel="preload" href={sansLatin} as="font" type="font/woff2" crossorigin />
+    <link rel="preload" href={sansLatinExt} as="font" type="font/woff2" crossorigin />
+    <title>{title}</title>
+    <meta name="description" content={description} />
+    {
+      noindex ? (
+        <meta name="robots" content="noindex" />
+      ) : (
+        <>
+          <link rel="canonical" href={url[lang]} />
+          <link rel="alternate" hreflang="ro" href={url.ro} />
+          <link rel="alternate" hreflang="en" href={url.en} />
+          <link rel="alternate" hreflang="x-default" href={url.en} />
+          <meta property="og:type" content="website" />
+          <meta property="og:url" content={url[lang]} />
+          <meta property="og:title" content={title} />
+          <meta property="og:description" content={description} />
+          <meta property="og:locale" content={lang === 'ro' ? 'ro_RO' : 'en_US'} />
+          <meta property="og:locale:alternate" content={lang === 'ro' ? 'en_US' : 'ro_RO'} />
+          <meta property="og:image" content={ogImage} />
+          <meta property="og:image:width" content="1200" />
+          <meta property="og:image:height" content="630" />
+          <meta property="og:image:alt" content={title} />
+          <meta name="twitter:card" content="summary_large_image" />
+          <script type="application/ld+json" set:html={JSON.stringify(person)} />
+        </>
+      )
+    }
+    {
+      lang === 'ro' && !noindex && (
+        <script is:inline>
+          // Romanian lives at zalog.ro/; everyone else starts in English at /en/.
+          // A language picked in the header wins, and so does arriving from another page of this site
+          // (the pick may not be storable); crawlers are left alone (hreflang tells them about both).
+          (function () {
+            var p, ref = '';
+            try { p = localStorage.getItem('pref-lang'); } catch (e) {}
+            try { ref = new URL(document.referrer).origin; } catch (e) {}
+            if (p === 'ro' || ref === location.origin || /bot|crawl|spider|slurp|lighthouse/i.test(navigator.userAgent)) return;
+            var l = (navigator.languages && navigator.languages[0]) || navigator.language || '';
+            if (p === 'en' || !/^ro\b/i.test(l)) location.replace('/en/' + location.search + location.hash);
+          })();
+        </script>
+      )
+    }
+    <link rel="icon" href="/favicon.ico" sizes="any" />
+    <script is:inline>
+      // Apply saved display settings before first paint, so there is no flash of the wrong theme or size
+      (function () {
+        var d = document.documentElement;
+        var get = function (k) { try { return localStorage.getItem(k); } catch (e) { return null; } };
+        var t = get('pref-theme'); if (t === 'light' || t === 'dark') d.setAttribute('data-theme', t);
+        var m = get('pref-motion'); if (m === 'full' || m === 'reduce') d.setAttribute('data-motion', m);
+        var s = get('pref-text'); if (s === 'sm' || s === 'lg' || s === 'xl') d.setAttribute('data-text', s);
+        // the Display button shows only where its panel can open, and from the first paint so the header never shifts
+        if ('popover' in HTMLElement.prototype) d.setAttribute('data-popover', '');
+      })();
+    </script>
+    {/* Cloudflare Web Analytics sets no cookies, so it needs no consent banner; local runs are not counted */}
+    {
+      import.meta.env.PROD && (
+        <script is:inline type="module" src="https://static.cloudflareinsights.com/beacon.min.js" data-cf-beacon='{"token": "8dfab81fc4ec4d89a0583df9496d5cbc"}'></script>
+      )
+    }
+    <slot name="head" />
+  </head>
+  <body>
+    <a href="#main" class="skip rounded-md bg-fg px-4 py-2 text-sm font-medium text-bg">{t('skip')}</a>
+    <div class="frame" aria-hidden="true"><div></div></div>
+    <slot />
+  </body>
+</html>

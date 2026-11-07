@@ -1,0 +1,28 @@
+---
+import { results, type Lang } from '../data/content';
+import { pick, useT } from '../i18n';
+
+interface Props {
+  lang: Lang;
+}
+
+const { lang } = Astro.props;
+const t = useT(lang);
+---
+
+<section id="results" class="scroll-mt-24" aria-labelledby="results-title">
+  <h2 id="results-title" class="mb-6 text-2xl font-semibold tracking-tight">{t('resultsTitle')}</h2>
+  <ul class="border-t border-line">
+    {
+      results.map((r) => (
+        <li id={`res-${r.id}`} class="reveal grid gap-x-8 gap-y-1 border-b border-line py-4 last:border-b-0 sm:grid-cols-[8rem_1fr]">
+          <p class="font-mono text-lg font-medium tabular-nums sm:pt-0.5 sm:text-base">{pick(r.key, lang)}</p>
+          <div class="min-w-0">
+            <p class="max-w-[44rem]">{r.text[lang]}</p>
+            <p class="mt-1 font-mono text-xs text-muted">{pick(r.where, lang)}</p>
+          </div>
+        </li>
+      ))
+    }
+  </ul>
+</section>

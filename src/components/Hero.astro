@@ -1,0 +1,27 @@
+---
+import { profile, years, type Lang } from '../data/content';
+import { useT } from '../i18n';
+
+interface Props {
+  lang: Lang;
+}
+
+const { lang } = Astro.props;
+const t = useT(lang);
+---
+
+<section
+  id="top"
+  class="flex flex-col justify-center pb-4 pt-56 sm:pt-60 lg:min-h-[calc(100svh-12rem)] lg:pt-20"
+  aria-labelledby="hero-title"
+>
+  <p class="mb-4 font-mono text-sm text-muted" data-role>{profile.role} · {profile.city[lang]}</p>
+  <h1 id="hero-title" class="text-5xl leading-[1.02] font-extrabold tracking-tight sm:text-7xl">{profile.name}</h1>
+  <p class="mt-6 max-w-[38rem] text-lg sm:text-xl">{t('intro', years)}</p>
+  <p class="mt-4 max-w-[38rem] text-muted">{t('intro2')}</p>
+  <p class="mt-8 font-mono text-xs text-muted">{[...profile.stack, t('remote')].join(' · ')}</p>
+  <p class="mt-8 flex flex-wrap gap-3 font-mono text-sm">
+    <a class="bracket bg-surface" href="#contact"><span>{t('getInTouch')}</span><span class="arrow" aria-hidden="true">↗</span></a>
+    <a class="bracket" href="#experience"><span>{t('seeExperience')}</span><span class="arrow" aria-hidden="true">↓</span></a>
+  </p>
+</section>
