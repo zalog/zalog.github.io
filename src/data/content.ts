@@ -10,7 +10,7 @@ export interface Focus { title: string | Localized; text: Localized; labels?: La
 export interface Role { id: string; company: string | Localized; from: number; to: number | null; role: string; type?: "parttime" | "volunteer" | "freelance" | "contract" | "intern"; text?: Localized; labels?: Labels }
 export interface Recent { id: string; name: string | Localized; href?: string; year: number; client: Localized; stack: string[]; text: Localized; labels?: Labels }
 /** Without `href` the site is offline; `featured` sites are named in the intro of "Earlier projects" and on the particle background */
-export interface Site { name: string; href?: string; skills: string[]; year: number; about: Localized; featured?: boolean; labels?: Labels }
+export interface Site { name: string; href?: string; skills: string[]; year: number; about: Localized; featured?: boolean; nofollow?: boolean; labels?: Labels }
 
 /** The email is kept in two parts, so no file holds the address as text. */
 export const profile = {
@@ -428,7 +428,7 @@ export const earlier: Site[] = [
   { name: "bound.ro", href: "https://bound.ro/", year: 2013, about: { en: "Bound, a club in Bucharest", ro: "Site-ul clubului Bound din București" }, skills: ["wordpress", "php", "html", "css", "jQuery", "javascript"] },
   { name: "tortionari.gandul.info", year: 2013, about: { en: "Gândul report on communist-era torturers", ro: "Investigația Gândul despre torționarii comuniști" }, skills: ["html", "css", "jQuery", "javascript"] },
   { name: "prosport.ro", featured: true, href: "https://www.prosport.ro/", year: 2013, about: { en: "ProSport, a national sports daily", ro: "Site-ul ProSport, cotidian sportiv național" }, skills: ["html", "css", "jQuery", "javascript"] },
-  { name: "autopro.ro", href: "https://autopro.ro/", year: 2013, about: { en: "AutoPro, a car magazine", ro: "Site-ul revistei auto AutoPro" }, skills: ["html", "css", "jQuery", "javascript"] },
+  { name: "autopro.ro", href: "https://autopro.ro/", nofollow: true, year: 2013, about: { en: "AutoPro, a car magazine", ro: "Site-ul revistei auto AutoPro" }, skills: ["html", "css", "jQuery", "javascript"] },
   { name: "tirbuson.ro", year: 2013, about: { en: "Wine club and online wine shop", ro: "Club de vinuri și magazin online" }, skills: ["html", "css", "jQuery", "javascript"] },
   { name: "csid.ro", href: "https://www.csid.ro/", year: 2013, about: { en: "Women’s health and lifestyle magazine", ro: "Revistă de sănătate și lifestyle pentru femei" }, skills: ["html", "css", "jQuery", "javascript"] },
   { name: "criserb.com", href: "https://www.criserb.com/blog/", year: 2013, about: { en: "Personal blog of Romanian blogger Cristi Șerb", ro: "Blogul personal al bloggerului Cristi Șerb" }, skills: ["wordpress", "php", "html", "css", "less", "bootstrap", "jQuery", "javascript", "nodejs"] },

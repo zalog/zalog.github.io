@@ -80,7 +80,7 @@ const highlights = earlier.filter((s) => s.featured).map((s) => s.name);
                 <div class="min-w-0">
                   <h4 class="text-lg font-semibold break-words">
                     {s.href ? (
-                      <a class="inline-flex items-baseline gap-2 hover:text-accent" href={s.href} target="_blank" rel="noopener">
+                      <a class="inline-flex items-baseline gap-2 hover:text-accent" href={s.href} target="_blank" rel={s.nofollow ? 'nofollow noopener' : 'noopener'}>
                         {s.name}
                         <span class="sr-only"> {t('newTab')}</span>
                         <span class="row-arrow text-base text-muted" aria-hidden="true">↗</span>
