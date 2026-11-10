@@ -1,0 +1,52 @@
+---
+import Base from '../layouts/Base.astro';
+import Header from './Header.astro';
+import Hero from './Hero.astro';
+import Statement from './Statement.astro';
+import Results from './Results.astro';
+import Focus from './Focus.astro';
+import Experience from './Experience.astro';
+import Projects from './Projects.astro';
+import Contact from './Contact.astro';
+import Footer from './Footer.astro';
+import DisplayPrefs from './DisplayPrefs.astro';
+import Particles from './Particles.astro';
+import type { Lang } from '../data/content';
+
+interface Props {
+  lang: Lang;
+}
+
+const { lang } = Astro.props;
+---
+
+<Base lang={lang}>
+  <Particles lang={lang} />
+  <Header lang={lang}>
+    <DisplayPrefs lang={lang} />
+  </Header>
+  <main id="main" class="layer gutter" tabindex="-1">
+    <div class="mx-auto max-w-5xl">
+      <Hero lang={lang} />
+      <div class="hatch" aria-hidden="true"></div>
+      <Statement lang={lang} />
+      <div class="hatch" aria-hidden="true"></div>
+      <Results lang={lang} />
+      <div class="hatch" aria-hidden="true"></div>
+      <Focus lang={lang} />
+      <div class="hatch" aria-hidden="true"></div>
+      <Experience lang={lang} />
+      <div class="hatch" aria-hidden="true"></div>
+      <Projects lang={lang} />
+      <div class="hatch" aria-hidden="true"></div>
+      <Contact lang={lang} />
+    </div>
+  </main>
+  <Footer />
+</Base>
+
+<script>
+  import { initJumpLinks } from '../scripts/jump';
+
+  initJumpLinks();
+</script>

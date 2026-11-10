@@ -1,0 +1,45 @@
+---
+import { experience, type Lang } from '../data/content';
+import { useT } from '../i18n';
+import ExperienceRow from './ExperienceRow.astro';
+
+interface Props {
+  lang: Lang;
+}
+
+const { lang } = Astro.props;
+const t = useT(lang);
+
+const latest = experience.slice(0, 4);
+const earlier = experience.slice(4);
+const since = Math.min(...earlier.map((x) => x.from));
+const until = Math.max(...earlier.map((x) => x.to ?? new Date().getFullYear()));
+---
+
+<section id="experience" class="scroll-mt-24" aria-labelledby="experience-title">
+  <div class="mb-6 flex flex-wrap items-baseline justify-between gap-x-6 gap-y-1">
+    <h2 id="experience-title" class="text-2xl font-semibold tracking-tight">{t('experienceTitle')}</h2>
+    <p class="font-mono text-sm text-muted">{t('experienceMeta', { since: Math.min(...experience.map((x) => x.from)) })}</p>
+  </div>
+  <ol class="border-t border-line">
+    {latest.map((x) => <ExperienceRow role={x} lang={lang} />)}
+    {/* .reveal is on the text, not the row: the list below makes the row taller, which rewinds its scroll animation */}
+    <li class="grid gap-x-8 gap-y-1 py-4 sm:grid-cols-[8rem_1fr]">
+      <p class="reveal font-mono text-sm text-muted tabular-nums sm:pt-0.5">{since} – {until}</p>
+      <div class="reveal min-w-0">
+        <h3 class="font-semibold">{t('experienceEarlierTitle')}</h3>
+        <p class="mt-1 max-w-[38rem] text-muted">{t('experienceEarlierIntro')}</p>
+      </div>
+      <details class="group sm:col-span-2">
+        <summary class="bracket mt-4 font-mono text-sm sm:ml-40">
+          <span class="group-open:hidden">{t('viewMore')}</span>
+          <span class="hidden group-open:inline">{t('viewLess')}</span>
+          <span class="caret inline-block" aria-hidden="true">›</span>
+        </summary>
+        <ol class="mt-5 border-t border-line">
+          {earlier.map((x) => <ExperienceRow role={x} lang={lang} />)}
+        </ol>
+      </details>
+    </li>
+  </ol>
+</section>
