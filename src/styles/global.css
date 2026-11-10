@@ -274,7 +274,8 @@ li.flash::after {
   top: calc(env(safe-area-inset-top, 0px) + 12px);
 }
 
-/* Sticky header; the band above it (phone safe area) is painted by body::before */
+/* Sticky header; the band above it (phone safe area) is painted by body::before. Both are clear at the top of the
+   page, so the particles show through, and fill in before the hero text reaches the header */
 .sticky-head {
   position: sticky;
   top: env(safe-area-inset-top, 0px);
@@ -282,25 +283,54 @@ li.flash::after {
   background: color-mix(in srgb, var(--bg) 82%, transparent);
   -webkit-backdrop-filter: blur(10px);
   backdrop-filter: blur(10px);
-  border-bottom: 1px solid transparent;
+  border-bottom: 1px solid var(--line);
 }
-.sticky-head.scrolled {
-  border-bottom-color: var(--line);
-}
-/* Scroll-driven, so the line is right in the first frame after a reload; Header.astro covers browsers without it.
+/* Scroll-driven, so both are right in the first frame after a reload; Header.astro covers browsers without it.
    Longhands: the minifier merges a shorthand and a timeline into one `animation`, which Chrome rejects */
-@keyframes head-line {
-  to {
-    border-bottom-color: var(--line);
+@keyframes head-clear {
+  from {
+    background-color: transparent;
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+    border-bottom-color: transparent;
+  }
+}
+@keyframes band-clear {
+  from {
+    opacity: 0;
   }
 }
 @supports (animation-timeline: scroll()) {
-  .sticky-head {
-    animation-name: head-line;
+  .sticky-head,
+  body::before {
     animation-timing-function: linear;
     animation-fill-mode: both;
     animation-timeline: scroll();
-    animation-range: 0 8px;
+    animation-range: 0 6rem;
+  }
+  .sticky-head {
+    animation-name: head-clear;
+  }
+  body::before {
+    animation-name: band-clear;
+  }
+}
+@supports not (animation-timeline: scroll()) {
+  .sticky-head {
+    transition-property: background-color, -webkit-backdrop-filter, backdrop-filter, border-color;
+    transition-duration: 0.3s;
+  }
+  body::before {
+    transition: opacity 0.3s;
+  }
+  :root.at-top .sticky-head {
+    background-color: transparent;
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+    border-bottom-color: transparent;
+  }
+  :root.at-top body::before {
+    opacity: 0;
   }
 }
 /* Header nav: at the top it is as far from the logo as the logo is from the frame line or the screen edge.

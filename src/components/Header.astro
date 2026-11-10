@@ -56,12 +56,12 @@ const languages: { code: Lang; label: string }[] = [
   </div>
 </header>
 <script is:inline>
-  // Bottom line for browsers without scroll timelines (global.css covers the rest).
+  // Clear header at the top for browsers without scroll timelines (global.css covers the rest).
   // Inline, so it already listens when a reload restores the scroll position
   (function () {
     if (CSS.supports('animation-timeline: scroll()')) return;
-    var head = document.currentScript.previousElementSibling;
-    var mark = function () { head.classList.toggle('scrolled', scrollY > 8); };
+    var root = document.documentElement;
+    var mark = function () { root.classList.toggle('at-top', scrollY <= 8); };
     addEventListener('scroll', mark, { passive: true });
     mark();
   })();
