@@ -1,6 +1,5 @@
 {
   "name": "zalog.ro",
-  "version": "1.0.0",
   "private": true,
   "type": "module",
   "description": "Portfolio of Cătălin Zălog, built with Astro and published to GitHub Pages.",
