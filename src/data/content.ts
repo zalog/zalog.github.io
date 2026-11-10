@@ -9,7 +9,7 @@ export interface Result { id: string; key: string | Localized; where: string | L
 export interface Focus { title: string | Localized; text: Localized; labels?: Labels }
 export interface Role { id: string; company: string | Localized; from: number; to: number | null; role: string; type?: "parttime" | "volunteer" | "freelance" | "contract" | "intern"; text?: Localized; labels?: Labels }
 export interface Recent { id: string; name: string | Localized; href?: string; year: number; client: Localized; stack: string[]; text: Localized; labels?: Labels }
-/** Without `href` the site is offline; `featured` sites are named in the intro of "Earlier projects" and on the particle background */
+/** Without `href` the site is offline; `featured` sites are named in the intro of "Earlier projects" */
 export interface Site { name: string; href?: string; skills: string[]; year: number; about: Localized; featured?: boolean; nofollow?: boolean; labels?: Labels }
 
 /** The email is kept in two parts, so no file holds the address as text. */

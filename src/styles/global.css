@@ -96,8 +96,7 @@
   z-index: 1;
 }
 
-/* Particle background: clusters on #bg, leader lines on #lines and clickable labels in #tags, all under the page
-   content, so the hero text stays on top */
+/* Particle background, under the page content so the hero text stays on top */
 #bg,
 #lines {
   position: fixed;
