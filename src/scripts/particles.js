@@ -11,8 +11,7 @@ export function initParticles(data) {
   if (!ctx || !lctx) return;
   var W = 0, H = 0, wide = false, rem = 16, born = 0, raf = 0, still = false, col = {}, last = 0;
   var pointer = { x: -1e4, y: -1e4 }, drag = null;
-  // Anchored to the hero (#top); its labels come from Particles.astro
-  var CLUSTERS = [{ id: 'top', seed: 1.3, tags: function () { return data.top } }];
+  var cluster = { seed: 1.3, live: [], deck: [] };
   function readColors() {
     var cs = getComputedStyle(root);
     col.fg = cs.getPropertyValue('--fg').trim(); col.accent = cs.getPropertyValue('--accent').trim();
@@ -39,7 +38,7 @@ export function initParticles(data) {
     }
     return pts;
   }
-  function clearTags() { CLUSTERS.forEach(function (c) { (c.live || []).forEach(function (g) { g.el.remove() }); c.live = []; }); }
+  function clearTags() { cluster.live.forEach(function (tg) { tg.el.remove() }); cluster.live = []; }
   function build() {
     sizes = {};
     var dpr = Math.min(devicePixelRatio || 1, 2);
@@ -49,20 +48,17 @@ export function initParticles(data) {
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
     lines.width = canvas.width; lines.height = canvas.height; lctx.setTransform(dpr, 0, 0, dpr, 0, 0);
     clearTags();
-    CLUSTERS.forEach(function (c) {
-      var n = wide ? 4500 : W < 640 ? 1200 : 2400;
-      if (!c.pts || c.pts.length !== n) c.pts = makePoints(n);   // same cloud across theme, text size and language changes
-      c.next = performance.now() + 1500;
-      c.deck = c.deck || []; c.stuck = 0;
-      if (c.ay == null) { c.ay = c.seed; c.ax = -0.25; c.vy = 0; c.vx = 0; }
-    });
+    var c = cluster, n = wide ? 4500 : W < 640 ? 1200 : 2400;
+    if (!c.pts || c.pts.length !== n) c.pts = makePoints(n);   // same cloud across theme, text size and language changes
+    c.next = performance.now() + 1500; c.stuck = 0;
+    if (c.ay == null) { c.ay = c.seed; c.ax = -0.25; c.vy = 0; c.vx = 0; }
   }
-  function geometry(c) {
-    var sec = document.getElementById(c.id); if (!sec) return null;
-    var r = sec.getBoundingClientRect();
+  function geometry() {
+    var hero = document.getElementById('top'); if (!hero) return null;
+    var r = hero.getBoundingClientRect();
     // Sized by the width alone: bound to the height, it would be a small ball over the name on short screens.
     // The 52rem cap keeps it around the column on wide screens.
-    var role = sec.querySelector('[data-role]'), roof = role ? role.getBoundingClientRect().top - 10 : r.top + 214;
+    var role = hero.querySelector('[data-role]'), roof = role ? role.getBoundingClientRect().top - 10 : r.top + 214;
     var g = { cx: W / 2, cy: roof, R: Math.min(W * 0.55, 52 * rem), side: 0, minX: 12, maxX: W - 12, maxY: roof };
     // Labels go where there is no text: right of the hero text on wide screens, above the role line on narrow ones
     if (wide) {
@@ -113,7 +109,7 @@ export function initParticles(data) {
   // Labels are dealt from a shuffled deck: each one comes up once per round, in a new order every round.
   // The labels still on screen go at the end of a new round, so none comes back right away.
   function deal(c, taken) {
-    var round = c.tags().filter(function (x) { return c.deck.indexOf(x) < 0 });
+    var round = data.top.filter(function (x) { return c.deck.indexOf(x) < 0 });
     for (var i = round.length - 1; i > 0; i--) { var j = Math.floor(Math.random() * (i + 1)), t = round[i]; round[i] = round[j]; round[j] = t; }
     c.deck = c.deck.concat(round.filter(function (x) { return taken.indexOf(x.text) < 0 }), round.filter(function (x) { return taken.indexOf(x.text) >= 0 }));
   }
@@ -182,10 +178,10 @@ export function initParticles(data) {
     var ease = function (r) { return 1 - Math.pow(1 - r, k60); };   // per-frame lerp factor r at 60 fps
     var nudge = ease(0.15);
     ctx.clearRect(0, 0, W, H); lctx.clearRect(0, 0, W, H);
-    CLUSTERS.forEach(function (c) {
-      var g = c.g = geometry(c);
-      // off screen: its labels are not needed any more (and an invisible label must not catch clicks)
-      if (!g || g.cy + g.R < -120 || g.cy - g.R > H + 120) { (c.live || []).forEach(function (x) { x.el.remove() }); c.live = []; return; }
+    var c = cluster, g = c.g = geometry();
+    // off screen: its labels are not needed any more (and an invisible label must not catch clicks)
+    if (!g || g.cy + g.R < -120 || g.cy - g.R > H + 120) clearTags();
+    else {
       // On load the cluster starts as scattered as it gets on scroll and comes together: 1 at first, easing to 0
       var gather = still ? 0 : Math.pow(1 - Math.min(1, age / 2000), 3);
       // Dispersion: 0 at the top of the page, rising to 1 as the hero scrolls away
@@ -197,7 +193,7 @@ export function initParticles(data) {
       if (Math.abs(target - disp) > 0.002) busy = true;
       // A big cloud turns (and is dragged) at the surface speed of a 320px one, so its labels stay readable
       c.pace = Math.min(1, 320 / g.R);
-      if (!still && !(drag && drag.c === c)) {
+      if (!still && !drag) {
         // after a drag the spin carries on and eases back to the slow idle turn
         c.vy += (0.0022 * c.pace - c.vy) * ease(0.025); c.vx += (0 - c.vx) * ease(0.05);
         c.ay += c.vy * k60; c.ax = Math.max(-1.3, Math.min(1.3, c.ax + c.vx * k60)); c.ax += (-0.25 - c.ax) * ease(0.008);
@@ -249,7 +245,7 @@ export function initParticles(data) {
       }
       // While the cluster is being dragged or is still spinning fast, labels would be whipped around
       // with their particles: let the current ones fade out and hold new ones until it settles
-      var fast = (drag && drag.c === c) || Math.abs(c.vy) > 0.008 || Math.abs(c.vx) > 0.006;
+      var fast = !!drag || Math.abs(c.vy) > 0.008 || Math.abs(c.vx) > 0.006;
       if (fast && !still) { c.live.forEach(function (tg) { if (!tg.clash) tg.clash = now }); c.next = Math.max(c.next, now + 700); }
       var onStage = g.cy > 90 && g.cy < H - 60 && disp < 0.25 && !fast;
       if (!still && onStage && now > c.next && c.live.length < 2 && gather === 0) { spawn(c, g, now, 3600); c.next = now + (1700 + Math.random() * 1700) * (g.side ? 1 : 0.6); }
@@ -299,10 +295,10 @@ export function initParticles(data) {
         tg.el.style.opacity = a.toFixed(3);
         return true;
       });
-    });
+    }
     occupied = placed;
     ctx.globalAlpha = 1;
-    // Keep looping only while a cluster is visible (or a tag is still up); scrolling back wakes it again
+    // Keep looping only while the cluster is visible (or a tag is still up); scrolling back wakes it again
     if (!still && !document.hidden && (busy || drag)) raf = requestAnimationFrame(frame);
   }
   function draw() { if (!raf) raf = requestAnimationFrame(frame); }
@@ -312,7 +308,7 @@ export function initParticles(data) {
     if (replay) born = 0;
     build(); draw();
   }
-  // Drag anywhere on a cluster to turn it. Controls keep working, and a press right on a line of text still
+  // Drag anywhere on the cluster to turn it. Controls keep working, and a press right on a line of text still
   // selects it: what counts is the glyphs under the pointer, not the (often much wider) element boxes.
   var NOGRAB = 'a,button,input,select,textarea,label,summary,.tag,[contenteditable]';
   function overText(x, y) {
@@ -330,18 +326,15 @@ export function initParticles(data) {
   }
   function canGrab(e) { return !(e.target.closest && e.target.closest(NOGRAB)) && !overText(e.clientX, e.clientY); }
   function hit(x, y) {
-    for (var i = 0; i < CLUSTERS.length; i++) {
-      // a cluster that has scattered on scroll is not there any more, even though its last position is kept
-      var c = CLUSTERS[i], g = c.g;
-      if (g && (c.disp == null || c.disp < 0.5) && Math.hypot(x - g.cx, y - g.cy) < g.R * 1.15) return c;
-    }
-    return null;
+    // once scattered on scroll the cluster is not there any more, even though its last position is kept
+    var c = cluster, g = c.g;
+    return !!g && (c.disp == null || c.disp < 0.5) && Math.hypot(x - g.cx, y - g.cy) < g.R * 1.15;
   }
   addEventListener('pointermove', function (e) {
     if (e.pointerType !== 'mouse') return;
     if (drag) {
       var dx = e.clientX - drag.x, dy = e.clientY - drag.y; drag.x = e.clientX; drag.y = e.clientY;
-      var c = drag.c, turn = 0.008 * c.pace;
+      var c = cluster, turn = 0.008 * c.pace;
       c.ay -= dx * turn; c.ax = Math.max(-1.3, Math.min(1.3, c.ax + dy * turn));
       var tnow = performance.now(); drag.s.push({ t: tnow, dx: dx, dy: dy });
       while (drag.s.length && tnow - drag.s[0].t > 80) drag.s.shift();
@@ -352,9 +345,9 @@ export function initParticles(data) {
   }, { passive: true });
   addEventListener('pointerdown', function (e) {
     if (still || e.pointerType !== 'mouse' || e.button !== 0) return;
-    var c = hit(e.clientX, e.clientY); if (!c || !canGrab(e)) return;
+    if (!hit(e.clientX, e.clientY) || !canGrab(e)) return;
     e.preventDefault();
-    drag = { c: c, x: e.clientX, y: e.clientY, s: [] }; c.vx = c.vy = 0;
+    drag = { x: e.clientX, y: e.clientY, s: [] }; cluster.vx = cluster.vy = 0;
     root.classList.add('dragging');
   });
   function endDrag() {
@@ -362,9 +355,9 @@ export function initParticles(data) {
     // carry on with the speed of the last 80ms, as radians per 60 fps frame
     var tnow = performance.now(), s = drag.s.filter(function (q) { return tnow - q.t <= 80 }), sx = 0, sy = 0;
     s.forEach(function (q) { sx += q.dx; sy += q.dy });
-    var span = s.length ? Math.max(16.667, tnow - s[0].t) : 1, turn = 0.008 * drag.c.pace;
+    var span = s.length ? Math.max(16.667, tnow - s[0].t) : 1, turn = 0.008 * cluster.pace;
     var cap = function (v) { return Math.max(-0.05, Math.min(0.05, v)) };   // a hard flick still settles gracefully
-    drag.c.vy = s.length ? cap(-sx / span * 16.667 * turn) : 0; drag.c.vx = s.length ? cap(sy / span * 16.667 * turn) : 0;
+    cluster.vy = s.length ? cap(-sx / span * 16.667 * turn) : 0; cluster.vx = s.length ? cap(sy / span * 16.667 * turn) : 0;
     drag = null; root.classList.remove('dragging'); draw();
   }
   addEventListener('pointerup', endDrag); addEventListener('pointercancel', endDrag); addEventListener('blur', endDrag);
