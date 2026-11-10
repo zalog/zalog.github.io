@@ -69,10 +69,11 @@ export function initParticles(data) {
       if (R < 110) return null;
       return { cx: textRight + free * 0.58, cy: r.top + r.height * 0.47, R: R, side: 1, minX: textRight + 8, maxX: W - 12, fadeX: textRight + 16 };
     }
-    // narrow screens: a big, loose cloud centred on the role line, its lower half behind the hero text;
-    // labels stay above that line
+    // narrow screens: a big, loose cloud wider than the screen (in landscape too, where a size bound to the
+    // height would leave a small ball over the name), centred on the role line, its lower half behind the hero
+    // text; labels stay above that line
     var role = sec.querySelector('[data-role]'), roof = role ? role.getBoundingClientRect().top - 10 : r.top + 214;
-    R = Math.min(W * 0.55, H * 0.5);
+    R = W * 0.55;
     return { cx: W / 2, cy: roof, R: R, side: 0, minX: 12, maxX: W - 12, maxY: roof };
   }
   // Areas taken by labels and their lines last frame, plus labels spawned in this one (without motion two
