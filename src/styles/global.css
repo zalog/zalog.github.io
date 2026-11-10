@@ -258,8 +258,10 @@ li.flash::after {
 
 /* Side gutter that also clears a phone's side safe area */
 .gutter {
-  padding-left: max(16px, env(safe-area-inset-left, 0px));
-  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  --gutter-left: max(16px, env(safe-area-inset-left, 0px));
+  --gutter-right: max(16px, env(safe-area-inset-right, 0px));
+  padding-left: var(--gutter-left);
+  padding-right: var(--gutter-right);
 }
 
 .skip {
@@ -370,6 +372,17 @@ body::before {
   margin-block: 4rem;
   border-block: 1px solid var(--line);
   background: repeating-linear-gradient(-45deg, var(--line) 0 1px, transparent 1px 9px);
+}
+/* Without the frame lines the bands run out to the screen edges. 100vw also counts a classic scrollbar, so main
+   clips what passes the edge instead of letting the page scroll sideways */
+@media (width < 72rem) {
+  main {
+    overflow-x: clip;
+  }
+  .hatch {
+    margin-left: calc(-1 * max(var(--gutter-left), (100vw - 64rem) / 2));
+    margin-right: calc(-1 * max(var(--gutter-right), (100vw - 64rem) / 2));
+  }
 }
 @media (min-width: 72rem) {
   .hatch {
