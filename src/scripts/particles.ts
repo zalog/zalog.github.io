@@ -1,19 +1,47 @@
 import { jumpTo } from './jump';
 import { motionReduced } from './store';
 
+interface Label { text: string; href: string }
+interface Point {
+  x: number; y: number; z: number; s: number; shell: boolean; halo: boolean; star: boolean; a: boolean;
+  sx: number; sy: number; ox: number; oy: number; front: number; rx: number; vis: number;
+  spread: number; jx: number; jy: number; jz: number;
+}
+interface Geometry { cx: number; cy: number; R: number; side: number; minX: number; maxX: number; maxY: number }
+interface Vec { x: number; y: number }
+interface Spot { x: number; y: number; w: number; h: number; x1: number; y1: number; x2: number; y2: number; pinned: boolean }
+interface Placement { L?: Vec; len: number; sgn: number; w: number; h: number }
+interface Tag extends Placement {
+  el: HTMLAnchorElement; p: number; L: Vec; born: number; life: number; hover: boolean; seen?: number;
+  peak?: number; leaving?: boolean; clash?: number; frozen?: Spot; fa?: number; lastSpot?: Spot; lastBase?: number;
+}
+interface Cluster {
+  live: Tag[]; deck: Label[]; pts: Point[]; next: number; stuck: number;
+  ay: number; ax: number; vy: number; vx: number; disp: number | null; pace: number; g: Geometry | null;
+}
+
+const SEED = 1.3;
+
+function findSurfaces() {
+  const canvas = document.querySelector<HTMLCanvasElement>('#bg'), lines = document.querySelector<HTMLCanvasElement>('#lines');
+  const layer = document.getElementById('tags'), ctx = canvas?.getContext('2d'), lctx = lines?.getContext('2d');
+  return canvas && lines && layer && ctx && lctx ? { canvas, lines, layer, ctx, lctx } : null;
+}
+
 // Background: a slowly turning cluster of particles behind the hero. Now and then a tag comes out of it on a
 // short leader line, naming a skill, a result, a past role or a project.
-export function initParticles(data) {
+export function initParticles(data: { top: Label[] }): void {
   const root = document.documentElement;
-  const canvas = document.getElementById('bg'), layer = document.getElementById('tags'), lines = document.getElementById('lines');
-  const lctx = lines.getContext && lines.getContext('2d');
-  const ctx = canvas.getContext && canvas.getContext('2d');
-  if (!ctx || !lctx) return;
+  const surfaces = findSurfaces();
+  if (!surfaces) return;
+  const { canvas, lines, layer, ctx, lctx } = surfaces;
   let W = 0, H = 0, wide = false, rem = 16, born = 0, raf = 0, still = false, last = 0;
-  const col = {};
+  const col = { fg: '', accent: '', light: false, boost: 1, grow: 1 };
   const pointer = { x: -1e4, y: -1e4 };
-  let drag = null;
-  const cluster = { seed: 1.3, live: [], deck: [] };
+  let drag: { x: number; y: number; s: { t: number; dx: number; dy: number }[] } | null = null;
+  const cluster: Cluster = {
+    live: [], deck: [], pts: [], next: 0, stuck: 0, ay: SEED, ax: -0.25, vy: 0, vx: 0, disp: null, pace: 1, g: null,
+  };
   function readColors() {
     const cs = getComputedStyle(root);
     col.fg = cs.getPropertyValue('--fg').trim(); col.accent = cs.getPropertyValue('--accent').trim();
@@ -22,9 +50,9 @@ export function initParticles(data) {
     col.boost = col.light ? 1.55 : 1; col.grow = col.light ? 1.2 : 1;
   }
   function unit() { const t = Math.random() * 6.2832, z = Math.random() * 2 - 1, r = Math.sqrt(1 - z * z); return [Math.cos(t) * r, Math.sin(t) * r, z]; }
-  function makePoints(n) {
+  function makePoints(n: number): Point[] {
     // A few lobes make the outline lumpy instead of a perfect sphere
-    const lobes = [unit(), unit(), unit()], pts = [];
+    const lobes = [unit(), unit(), unit()], pts: Point[] = [];
     for (let i = 0; i < n; i++) {
       const d = unit(), L = lobes[i % 3], pull = Math.random() * 0.45;
       let x = d[0] + L[0] * pull, y = d[1] + L[1] * pull, z = d[2] + L[2] * pull;
@@ -37,7 +65,7 @@ export function initParticles(data) {
       const star = Math.random() < 0.035;
       const j = unit();
       pts.push({ x: x, y: y, z: z, s: s, shell: shell, halo: halo, star: star && !halo, a: star ? Math.random() < 0.5 : Math.random() < 0.07,
-        sx: 0, sy: 0, front: 0, ox: 0, oy: 0, spread: 0.8 + Math.random() * 2.8, jx: j[0], jy: j[1], jz: j[2] });
+        sx: 0, sy: 0, front: 0, rx: 0, vis: 0, ox: 0, oy: 0, spread: 0.8 + Math.random() * 2.8, jx: j[0], jy: j[1], jz: j[2] });
     }
     return pts;
   }
@@ -52,11 +80,10 @@ export function initParticles(data) {
     lines.width = canvas.width; lines.height = canvas.height; lctx.setTransform(dpr, 0, 0, dpr, 0, 0);
     clearTags();
     const c = cluster, n = wide ? 4500 : W < 640 ? 1200 : 2400;
-    if (!c.pts || c.pts.length !== n) c.pts = makePoints(n);   // same cloud across theme, text size and language changes
+    if (c.pts.length !== n) c.pts = makePoints(n);   // same cloud across theme, text size and language changes
     c.next = performance.now() + 1500; c.stuck = 0;
-    if (c.ay == null) { c.ay = c.seed; c.ax = -0.25; c.vy = 0; c.vx = 0; }
   }
-  function geometry() {
+  function geometry(): Geometry | null {
     const hero = document.getElementById('top'); if (!hero) return null;
     const r = hero.getBoundingClientRect();
     // Sized by the width alone: bound to the height, it would be a small ball over the name on short screens.
@@ -72,18 +99,18 @@ export function initParticles(data) {
   }
   // Areas taken by labels and their lines last frame, plus labels spawned in this one (without motion two
   // spawn in the same frame), so a new label never lands on (or draws across) another
-  let occupied = [];
-  function overlap(a, b, pad) { return a.x < b.x + b.w + pad && a.x + a.w + pad > b.x && a.y < b.y + b.h + pad && a.y + a.h + pad > b.y; }
-  function crosses(s, r, pad) {
+  let occupied: Spot[] = [];
+  function overlap(a: Spot, b: Spot, pad: number): boolean { return a.x < b.x + b.w + pad && a.x + a.w + pad > b.x && a.y < b.y + b.h + pad && a.y + a.h + pad > b.y; }
+  function crosses(s: Spot, r: Spot, pad: number): boolean {
     for (let k = 0; k <= 12; k++) { const x = s.x1 + (s.x2 - s.x1) * k / 12, y = s.y1 + (s.y2 - s.y1) * k / 12;
       if (x > r.x - pad && x < r.x + r.w + pad && y > r.y - pad && y < r.y + r.h + pad) return true; }
     return false;
   }
-  function clashes(o, list, gap) {
+  function clashes(o: Spot, list: Spot[], gap: number): boolean {
     return list.some(function (q) { return overlap(o, q, gap) || crosses(o, q, gap / 2) || crosses(q, o, gap / 2); });
   }
   // where a label sits for a particle, and the line from the particle to the label's square
-  function place(tg, p, g) {
+  function place(tg: Placement, p: Point, g: Geometry): Spot {
     // The leader keeps the direction it was given at spawn: recomputing it from the particle's position
     // swings the label around when the particle passes near the centre of the cluster
     const L = tg.L || leader(g, p), ex = p.sx + L.x * tg.len, ey = p.sy + L.y * tg.len;
@@ -94,7 +121,7 @@ export function initParticles(data) {
     return { x: lx, y: ly, w: tg.w, h: tg.h, x1: p.sx, y1: p.sy, x2: nx, y2: ny, pinned: Math.abs(lx - lx0) > 0.5 || Math.abs(ly - ly0) > 0.5 };
   }
   // Leader direction for a particle: outward from the centre, bent toward the cluster's open side
-  function leader(g, p) {
+  function leader(g: Geometry, p: Point): Vec {
     let dx = p.sx - g.cx, dy = p.sy - g.cy;
     const d = Math.sqrt(dx * dx + dy * dy) || 1;
     dx = dx / d * 0.75 + g.side * 0.25; dy /= d;
@@ -102,8 +129,8 @@ export function initParticles(data) {
     return { x: dx / n, y: dy / n };
   }
   // Label sizes, measured once per text (cleared on rebuild, since the text size setting changes them)
-  let sizes = {};
-  function measure(text) {
+  let sizes: Record<string, { w: number; h: number }> = {};
+  function measure(text: string) {
     if (!sizes[text]) {
       const m = document.createElement('a'); m.className = 'tag'; m.textContent = text; m.style.visibility = 'hidden';
       layer.appendChild(m); sizes[text] = { w: m.offsetWidth, h: m.offsetHeight }; m.remove();
@@ -112,15 +139,15 @@ export function initParticles(data) {
   }
   // Labels are dealt from a shuffled deck: each one comes up once per round, in a new order every round.
   // The labels still on screen go at the end of a new round, so none comes back right away.
-  function deal(c, taken) {
+  function deal(c: Cluster, taken: (string | null)[]) {
     const round = data.top.filter(function (x) { return c.deck.indexOf(x) < 0 });
     for (let i = round.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)), t = round[i]; round[i] = round[j]; round[j] = t; }
     c.deck = c.deck.concat(round.filter(function (x) { return taken.indexOf(x.text) < 0 }), round.filter(function (x) { return taken.indexOf(x.text) >= 0 }));
   }
-  function spawn(c, g, now, life) {
-    let item, w, h, len, cand = -1, sgn = 1, spot, pick = -1;
+  function spawn(c: Cluster, g: Geometry, now: number, life: number) {
+    let item!: Label, w = 0, h = 0, len = 0, cand = -1, sgn = 1, spot!: Spot, pick = -1;
     const taken = c.live.map(function (x) { return x.el.textContent });
-    const top = document.querySelector('.sticky-head').getBoundingClientRect().bottom + 8;
+    const top = (document.querySelector('.sticky-head')?.getBoundingClientRect().bottom ?? 0) + 8;
     if (!c.deck.length) deal(c, taken);
     // A label that finds no room keeps its place at the front of the deck, so it is tried first next time
     // instead of waiting a whole round
@@ -158,7 +185,7 @@ export function initParticles(data) {
     layer.appendChild(a);
     // the label's square faces its particle; longer labels stay up longer
     a.classList.toggle('rev', sgn < 0);
-    const tg = { el: a, p: cand, L: leader(g, c.pts[cand]), born: now, life: life === Infinity ? life : life + item.text.length * 70, w: w, h: h, len: len, sgn: sgn, hover: false };
+    const tg: Tag = { el: a, p: cand, L: leader(g, c.pts[cand]), born: now, life: life === Infinity ? life : life + item.text.length * 70, w: w, h: h, len: len, sgn: sgn, hover: false };
     a.addEventListener('pointerenter', function () { tg.hover = true });
     a.addEventListener('pointerleave', function () { tg.hover = false });
     c.live.push(tg);
@@ -172,15 +199,15 @@ export function initParticles(data) {
     const top = Math.round(head.getBoundingClientRect().bottom);
     if (top !== clipTop) { clipTop = top; layer.style.clipPath = 'inset(' + top + 'px 0 0 0)'; }
   }
-  function frame(now) {
+  function frame(now: number) {
     clipTags();
     raf = 0;
     if (!born) born = now;
-    const age = now - born, placed = [];
+    const age = now - born, placed: Spot[] = [];
     let busy = false;
     // All motion is scaled to a 60 fps frame, so a 120 Hz screen turns the cluster at the same speed
     const dt = Math.min(64, last ? now - last : 16.667), k60 = dt / 16.667; last = now;
-    const ease = function (r) { return 1 - Math.pow(1 - r, k60); };   // per-frame lerp factor r at 60 fps
+    const ease = function (r: number) { return 1 - Math.pow(1 - r, k60); };   // per-frame lerp factor r at 60 fps
     const nudge = ease(0.15);
     ctx.clearRect(0, 0, W, H); lctx.clearRect(0, 0, W, H);
     const c = cluster, g = c.g = geometry();
@@ -214,7 +241,7 @@ export function initParticles(data) {
           const p = c.pts[i];
           if (p.a !== !!pass) continue;
           // organic surface: a few sines over the direction, drifting in time
-          const k = 1 + 0.24 * Math.sin(p.x * 2.6 + T + c.seed) * Math.sin(p.y * 2.2 - T * 0.8) + 0.1 * Math.sin(p.z * 4 + T * 1.3 + c.seed);
+          const k = 1 + 0.24 * Math.sin(p.x * 2.6 + T + SEED) * Math.sin(p.y * 2.2 - T * 0.8) + 0.1 * Math.sin(p.z * 4 + T * 1.3 + SEED);
           const e = 1 + disp * p.spread, j = disp * 0.9;
           const x = p.x * k * p.s * e + p.jx * j, y = p.y * k * p.s * e + p.jy * j, z = p.z * k * p.s * e + p.jz * j;
           const x1 = x * cyA + z * syA, z1 = -x * syA + z * cyA;
@@ -282,7 +309,7 @@ export function initParticles(data) {
         if (!tg.frozen) { tg.lastSpot = spot; tg.lastBase = base; }
         const gone = tg.clash ? 1 - (now - tg.clash) / 250 : 1;
         if (gone <= 0) { tg.el.remove(); return false; }
-        let a = still ? 1 : (tg.frozen ? tg.fa : base) * gone;
+        let a = still ? 1 : (tg.fa ?? base) * gone;
         a *= Math.max(0, 1 - disp * 3);
         tg.el.classList.toggle('gone', a < 0.2);
         if (a > 0.05) placed.push(spot);
@@ -308,7 +335,7 @@ export function initParticles(data) {
     if (!still && !document.hidden && (busy || drag)) raf = requestAnimationFrame(frame);
   }
   function draw() { if (!raf) raf = requestAnimationFrame(frame); }
-  function restart(replay) {
+  function restart(replay: boolean) {
     cancelAnimationFrame(raf); raf = 0;
     still = motionReduced(); readColors();
     if (replay) born = 0;
@@ -317,21 +344,26 @@ export function initParticles(data) {
   // Drag anywhere on the cluster to turn it. Controls keep working, and a press right on a line of text still
   // selects it: what counts is the glyphs under the pointer, not the (often much wider) element boxes.
   const NOGRAB = 'a,button,input,select,textarea,label,summary,.tag,[contenteditable]';
-  function overText(x, y) {
-    let node, off;
+  function overText(x: number, y: number): boolean {
+    let node: Node | undefined, off = 0;
     if (document.caretPositionFromPoint) { const cp = document.caretPositionFromPoint(x, y); if (cp) { node = cp.offsetNode; off = cp.offset; } }
     else if (document.caretRangeFromPoint) { const cr = document.caretRangeFromPoint(x, y); if (cr) { node = cr.startContainer; off = cr.startOffset; } }
-    if (!node || node.nodeType !== 3 || !node.length) return false;
+    if (!node || node.nodeType !== 3) return false;
+    const len = (node as Text).length;
+    if (!len) return false;
     const r = document.createRange();
-    for (let i = Math.max(0, off - 1); i <= Math.min(node.length - 1, off); i++) {
+    for (let i = Math.max(0, off - 1); i <= Math.min(len - 1, off); i++) {
       r.setStart(node, i); r.setEnd(node, i + 1);
       const b = r.getBoundingClientRect();
       if (x >= b.left - 2 && x <= b.right + 2 && y >= b.top - 2 && y <= b.bottom + 2) return true;
     }
     return false;
   }
-  function canGrab(e) { return !(e.target.closest && e.target.closest(NOGRAB)) && !overText(e.clientX, e.clientY); }
-  function hit(x, y) {
+  function canGrab(e: PointerEvent): boolean {
+    const t = e.target as Element;
+    return !(t.closest && t.closest(NOGRAB)) && !overText(e.clientX, e.clientY);
+  }
+  function hit(x: number, y: number): boolean {
     // once scattered on scroll the cluster is not there any more, even though its last position is kept
     const c = cluster, g = c.g;
     return !!g && (c.disp == null || c.disp < 0.5) && Math.hypot(x - g.cx, y - g.cy) < g.R * 1.15;
@@ -345,7 +377,7 @@ export function initParticles(data) {
       const tnow = performance.now(); drag.s.push({ t: tnow, dx: dx, dy: dy });
       while (drag.s.length && tnow - drag.s[0].t > 80) drag.s.shift();
     } else {
-      root.classList.toggle('grab', !still && !!hit(e.clientX, e.clientY) && canGrab(e));
+      root.classList.toggle('grab', !still && hit(e.clientX, e.clientY) && canGrab(e));
     }
     pointer.x = e.clientX; pointer.y = e.clientY;
   }, { passive: true });
@@ -363,7 +395,7 @@ export function initParticles(data) {
     let sx = 0, sy = 0;
     s.forEach(function (q) { sx += q.dx; sy += q.dy });
     const span = s.length ? Math.max(16.667, tnow - s[0].t) : 1, turn = 0.008 * cluster.pace;
-    const cap = function (v) { return Math.max(-0.05, Math.min(0.05, v)) };   // a hard flick still settles gracefully
+    const cap = function (v: number) { return Math.max(-0.05, Math.min(0.05, v)) };   // a hard flick still settles gracefully
     cluster.vy = s.length ? cap(-sx / span * 16.667 * turn) : 0; cluster.vx = s.length ? cap(sy / span * 16.667 * turn) : 0;
     drag = null; root.classList.remove('dragging'); draw();
   }
@@ -372,7 +404,7 @@ export function initParticles(data) {
   root.addEventListener('pointerleave', function () { pointer.x = pointer.y = -1e4; });
   addEventListener('scroll', draw, { passive: true });
   document.addEventListener('visibilitychange', draw);
-  let rt, lastW = innerWidth;
+  let rt: ReturnType<typeof setTimeout> | undefined, lastW = innerWidth;
   addEventListener('resize', function () {
     clearTimeout(rt);
     rt = setTimeout(function () { if (innerWidth !== lastW || innerWidth >= 1024) { lastW = innerWidth; restart(false); } }, 150);
@@ -387,14 +419,14 @@ export function initParticles(data) {
 }
 
 /** A label in the background jumps to the row it names and lights it up (see jump.ts) */
-export function initTagLinks() {
+export function initTagLinks(): void {
   const layer = document.getElementById('tags');
   if (!layer) return;
   layer.addEventListener('click', (e) => {
-    const a = e.target.closest('a.tag');
+    const a = (e.target as Element).closest<HTMLAnchorElement>('a.tag');
     if (!a) return;
     e.preventDefault();
-    const target = document.getElementById(a.getAttribute('href').slice(1));
+    const target = document.getElementById((a.getAttribute('href') ?? '').slice(1));
     if (target) jumpTo(target);
   });
 }
