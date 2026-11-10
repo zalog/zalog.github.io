@@ -61,9 +61,10 @@ export function initParticles(data) {
     var sec = document.getElementById(c.id); if (!sec) return null;
     var r = sec.getBoundingClientRect(), colW = Math.min(W - 32, 64 * rem), left = (W - colW) / 2;
     if (wide) {
-      // big: from the top of the screen down past the hero text, right of the text and running off the edge
-      // of the screen; anything that drifts behind the text is dimmed (fadeX) so the copy stays readable
-      var textRight = left + Math.min(colW, 38 * rem), free = W - textRight - 24;
+      // big: from the top of the screen down past the hero text, right of the text; anything that drifts behind
+      // the text is dimmed (fadeX) so the copy stays readable. The space it is centred in stops growing at
+      // 40rem, so on wide screens it stays by the column instead of moving out toward the edge.
+      var textRight = left + Math.min(colW, 38 * rem), free = Math.min(W - textRight - 24, 40 * rem);
       var R = Math.min(H * 0.46, 440, (free + 80) / 1.55);
       if (R < 110) return null;
       return { cx: textRight + free * 0.58, cy: r.top + r.height * 0.47, R: R, side: 1, minX: textRight + 8, maxX: W - 12, fadeX: textRight + 16 };
