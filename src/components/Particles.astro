@@ -1,6 +1,7 @@
 ---
 import { earlier, experience, focus, recent, results, years, type Labels, type Lang } from '../data/content';
 import { pick, slug, useT } from '../i18n';
+import type { ParticleData } from '../scripts/particles';
 
 interface Props {
   lang: Lang;
@@ -12,7 +13,7 @@ const t = useT(lang);
 const labelled = <T extends { labels?: Labels }>(rows: T[], href: (row: T) => string) =>
   rows.flatMap((row) => (row.labels ?? []).map((label) => ({ text: pick(label, lang), href: href(row) })));
 
-const data = {
+const data: ParticleData = {
   top: [
     ...labelled(focus, () => '#focus'),
     ...labelled(results, (r) => `#res-${r.id}`),
@@ -31,7 +32,7 @@ const data = {
 <script type="application/json" id="particle-data" set:html={JSON.stringify(data).replaceAll('<', '\\u003c')} />
 
 <script>
-  import { initParticles, initTagLinks } from '../scripts/particles.js';
+  import { initParticles, initTagLinks } from '../scripts/particles';
 
   const raw = document.getElementById('particle-data')?.textContent;
   if (raw) {
