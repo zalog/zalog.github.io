@@ -94,7 +94,7 @@ export function initParticles(data) {
     // swings the label around when the particle passes near the centre of the cluster
     var L = tg.L || leader(g, p), ex = p.sx + L.x * tg.len, ey = p.sy + L.y * tg.len;
     var lx0 = tg.sgn > 0 ? ex : ex - tg.w, ly0 = ey - tg.h / 2;
-    var lx = Math.max(g.minX, Math.min(g.maxX - tg.w, lx0)), ly = Math.max(8, Math.min(H - tg.h - 8, ly0));
+    var lx = Math.max(g.minX, Math.min(g.maxX - tg.w, lx0)), ly = Math.max(8, Math.min(Math.min(H - 8, g.maxY || H) - tg.h, ly0));
     // ends on the centre of the square, which straddles the label's near border
     var nx = tg.sgn > 0 ? lx - 0.5 : lx + tg.w + 0.5, ny = ly + tg.h / 2;
     return { x: lx, y: ly, w: tg.w, h: tg.h, x1: p.sx, y1: p.sy, x2: nx, y2: ny, pinned: Math.abs(lx - lx0) > 0.5 || Math.abs(ly - ly0) > 0.5 };
