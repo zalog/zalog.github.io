@@ -1,9 +1,8 @@
 import { jumpTo } from './jump';
 import { motionReduced } from './store';
 
-// Background: slowly turning clusters of particles, one next to the hero and (on wide screens) one beside
-// Experience and one beside Projects. Now and then a tag comes out of a cluster on a short leader line,
-// naming a skill, a past role or a project.
+// Background: a slowly turning cluster of particles next to the hero. Now and then a tag comes out of it on a
+// short leader line, naming a skill, a result, a past role or a project.
 export function initParticles(data) {
   var root = document.documentElement;
   var canvas = document.getElementById('bg'), layer = document.getElementById('tags'), lines = document.getElementById('lines');
@@ -12,13 +11,8 @@ export function initParticles(data) {
   if (!ctx || !lctx) return;
   var W = 0, H = 0, wide = false, rem = 16, born = 0, raf = 0, still = false, col = {}, last = 0;
   var pointer = { x: -1e4, y: -1e4 }, drag = null;
-  // Each cluster is anchored to a section; its labels come from the page data (see Particles.astro).
-  // `turn` makes the particles come round on the side the labels open to (the left for the left margin).
-  var CLUSTERS = [
-    { id: 'top', seed: 1.3, turn: 1, tags: function () { return data.top } },
-    { id: 'experience', seed: 4.1, turn: 1, margin: 'right', tags: function () { return data.experience } },
-    { id: 'projects', seed: 7.7, turn: -1, margin: 'left', tags: function () { return data.projects } }
-  ];
+  // Anchored to the hero (#top); its labels come from Particles.astro
+  var CLUSTERS = [{ id: 'top', seed: 1.3, tags: function () { return data.top } }];
   function readColors() {
     var cs = getComputedStyle(root);
     col.fg = cs.getPropertyValue('--fg').trim(); col.accent = cs.getPropertyValue('--accent').trim();
@@ -55,36 +49,30 @@ export function initParticles(data) {
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
     lines.width = canvas.width; lines.height = canvas.height; lctx.setTransform(dpr, 0, 0, dpr, 0, 0);
     clearTags();
-    CLUSTERS.forEach(function (c, i) {
-      var n = c.id === 'top' ? (wide ? 3000 : W < 640 ? 1200 : 2400) : 1000;
+    CLUSTERS.forEach(function (c) {
+      var n = wide ? 3000 : W < 640 ? 1200 : 2400;
       if (!c.pts || c.pts.length !== n) c.pts = makePoints(n);   // same cloud across theme, text size and language changes
-      c.next = performance.now() + 1500 + i * 900;
+      c.next = performance.now() + 1500;
       c.deck = c.deck || []; c.stuck = 0;
       if (c.ay == null) { c.ay = c.seed; c.ax = -0.25; c.vy = 0; c.vx = 0; }
     });
   }
   function geometry(c) {
     var sec = document.getElementById(c.id); if (!sec) return null;
-    var r = sec.getBoundingClientRect(), colW = Math.min(W - 32, 64 * rem), left = (W - colW) / 2, right = W - left;
-    if (c.id === 'top') {
-      if (wide) {
-        // big: from the top of the screen down past the hero text, right of the text and running off the edge
-        // of the screen; anything that drifts behind the text is dimmed (fadeX) so the copy stays readable
-        var textRight = left + Math.min(colW, 38 * rem), free = W - textRight - 24;
-        var R = Math.min(H * 0.46, 440, (free + 80) / 1.55);
-        if (R < 110) return null;
-        return { cx: textRight + free * 0.58, cy: r.top + r.height * 0.47, R: R, side: 1, minX: textRight + 8, maxX: W - 12, fadeX: textRight + 16 };
-      }
-      // narrow screens: a big, loose cloud centred on the role line, its lower half behind the hero text;
-      // labels stay above that line
-      var role = sec.querySelector('[data-role]'), roof = role ? role.getBoundingClientRect().top - 10 : r.top + 214;
-      R = Math.min(W * 0.55, H * 0.5);
-      return { cx: W / 2, cy: roof, R: R, side: 0, minX: 12, maxX: W - 12, maxY: roof };
+    var r = sec.getBoundingClientRect(), colW = Math.min(W - 32, 64 * rem), left = (W - colW) / 2;
+    if (wide) {
+      // big: from the top of the screen down past the hero text, right of the text and running off the edge
+      // of the screen; anything that drifts behind the text is dimmed (fadeX) so the copy stays readable
+      var textRight = left + Math.min(colW, 38 * rem), free = W - textRight - 24;
+      var R = Math.min(H * 0.46, 440, (free + 80) / 1.55);
+      if (R < 110) return null;
+      return { cx: textRight + free * 0.58, cy: r.top + r.height * 0.47, R: R, side: 1, minX: textRight + 8, maxX: W - 12, fadeX: textRight + 16 };
     }
-    if (!wide || left < 260) return null;
-    R = Math.min(left * 0.36, 150);
-    return c.margin === 'right' ? { cx: right + left / 2, cy: r.top + 190, R: R, side: 1, minX: right + 8, maxX: W - 12 }
-      : { cx: left / 2, cy: r.top + 190, R: R, side: -1, minX: 12, maxX: left - 8 };
+    // narrow screens: a big, loose cloud centred on the role line, its lower half behind the hero text;
+    // labels stay above that line
+    var role = sec.querySelector('[data-role]'), roof = role ? role.getBoundingClientRect().top - 10 : r.top + 214;
+    R = Math.min(W * 0.55, H * 0.5);
+    return { cx: W / 2, cy: roof, R: R, side: 0, minX: 12, maxX: W - 12, maxY: roof };
   }
   // Areas taken by labels and their lines last frame, plus labels spawned in this one (without motion two
   // spawn in the same frame), so a new label never lands on (or draws across) another
@@ -203,8 +191,8 @@ export function initParticles(data) {
       if (!g || g.cy + g.R < -120 || g.cy - g.R > H + 120) { (c.live || []).forEach(function (x) { x.el.remove() }); c.live = []; return; }
       // On load the cluster starts as scattered as it gets on scroll and comes together: 1 at first, easing to 0
       var gather = still ? 0 : Math.pow(1 - Math.min(1, age / 2000), 3);
-      // Dispersion: 0 while the cluster sits in the middle of the screen, rising to 1 as it scrolls away
-      var off = c.id === 'top' ? Math.max(0, scrollY / (H * 0.55)) : Math.max(0, (Math.abs(g.cy - H * 0.45) - H * 0.18) / (H * 0.35));
+      // Dispersion: 0 at the top of the page, rising to 1 as the hero scrolls away
+      var off = Math.max(0, scrollY / (H * 0.55));
       var target = Math.min(1, off); target = target * target * (3 - 2 * target);
       // eased toward the scroll position, so a notched mouse wheel does not make the particles jump
       c.disp = still || c.disp == null ? target : c.disp + (target - c.disp) * ease(0.16);
@@ -212,7 +200,7 @@ export function initParticles(data) {
       if (Math.abs(target - disp) > 0.002) busy = true;
       if (!still && !(drag && drag.c === c)) {
         // after a drag the spin carries on and eases back to the slow idle turn
-        c.vy += (0.0022 * c.turn - c.vy) * ease(0.025); c.vx += (0 - c.vx) * ease(0.05);
+        c.vy += (0.0022 - c.vy) * ease(0.025); c.vx += (0 - c.vx) * ease(0.05);
         c.ay += c.vy * k60; c.ax = Math.max(-1.3, Math.min(1.3, c.ax + c.vx * k60)); c.ax += (-0.25 - c.ax) * ease(0.008);
       }
       var ay = c.ay, ax = c.ax;

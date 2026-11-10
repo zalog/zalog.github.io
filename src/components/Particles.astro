@@ -21,16 +21,6 @@ const data = {
     ...labelled(earlier, (s) => `#site-${slug(s.name)}`),
     { text: t('yearsOnWeb', years), href: '#experience' },
   ],
-  experience: experience
-    .filter((x) => x.text)
-    .map((x) => ({
-      text: `${pick(x.company, lang)} · ${x.from === x.to ? x.from : `${x.from}–${x.to ?? t('present')}`}`,
-      href: `#exp-${x.id}`,
-    })),
-  projects: [
-    ...recent.map((r) => ({ text: pick(r.name, lang), href: `#proj-${r.id}` })),
-    ...earlier.filter((s) => s.featured).map((s) => ({ text: `${s.name} · ${s.year}`, href: `#site-${slug(s.name)}` })),
-  ],
 };
 ---
 
