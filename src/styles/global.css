@@ -501,7 +501,8 @@ details[open] .caret {
   transform: rotate(90deg);
 }
 
-/* Approach statement: without JavaScript every word is lit; the script dims them and lights them on scroll */
+/* Approach statement: without JavaScript every word is lit; the script dims them and lights them on scroll.
+   A dimmed word keeps 3:1 contrast in both themes, the WCAG minimum for large text */
 .statement .w {
   color: var(--fg);
 }
@@ -509,7 +510,7 @@ details[open] .caret {
   color: var(--accent);
 }
 .statement.armed .w {
-  color: color-mix(in srgb, var(--fg) 28%, var(--bg));
+  color: color-mix(in srgb, var(--fg) 50%, var(--bg));
   transition: color 0.35s ease;
 }
 .statement.armed .w.lit {
