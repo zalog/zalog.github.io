@@ -27,9 +27,9 @@ const languages: { code: Lang; label: string }[] = [
 
     <nav class="head-nav" aria-label={t('navMain')}>
       <ul class="flex items-center gap-0.5 text-sm sm:gap-3">
-        <li><a class="rounded px-1.5 py-1 text-muted hover:text-fg" href="#experience" data-jump>{t('navExperience')}</a></li>
-        <li class="hidden sm:block"><a class="rounded px-1.5 py-1 text-muted hover:text-fg" href="#projects" data-jump>{t('navProjects')}</a></li>
-        <li class="hidden min-[22.5rem]:block"><a class="rounded px-1.5 py-1 text-muted hover:text-fg" href="#contact" data-jump>{t('navContact')}</a></li>
+        <li><a class="rounded px-1.5 py-1 text-muted underline decoration-transparent underline-offset-4 transition-colors hover:text-fg aria-current:text-fg aria-current:decoration-current" href="#experience" data-jump>{t('navExperience')}</a></li>
+        <li class="hidden sm:block"><a class="rounded px-1.5 py-1 text-muted underline decoration-transparent underline-offset-4 transition-colors hover:text-fg aria-current:text-fg aria-current:decoration-current" href="#projects" data-jump>{t('navProjects')}</a></li>
+        <li class="hidden min-[22.5rem]:block"><a class="rounded px-1.5 py-1 text-muted underline decoration-transparent underline-offset-4 transition-colors hover:text-fg aria-current:text-fg aria-current:decoration-current" href="#contact" data-jump>{t('navContact')}</a></li>
       </ul>
     </nav>
 
@@ -78,4 +78,33 @@ const languages: { code: Lang; label: string }[] = [
       }
     }),
   );
+
+  // The nav link of the last section that reaches above 40% of the viewport is current
+  const links = document.querySelectorAll<HTMLAnchorElement>('.head-nav a');
+  const sections = [...document.querySelectorAll<HTMLElement>('main section[id]')];
+  const above = new Set<Element>();
+  let atEnd = false;
+  let current: string | undefined;
+  const mark = () => {
+    const id = (atEnd ? sections.at(-1) : sections.findLast((s) => above.has(s)))?.id;
+    if (id === current) return;
+    current = id;
+    links.forEach((a) => (a.hash === `#${id}` ? a.setAttribute('aria-current', 'true') : a.removeAttribute('aria-current')));
+  };
+  const spy = new IntersectionObserver(
+    (entries) => {
+      entries.forEach((e) => (e.isIntersecting ? above.add(e.target) : above.delete(e.target)));
+      mark();
+    },
+    // the root also covers one viewport above, so a section stays current while the hatched band after it crosses 40%
+    { rootMargin: '100% 0px -60% 0px' },
+  );
+  sections.forEach((s) => spy.observe(s));
+  // the page can end before the last section's top reaches 40%
+  const footer = document.querySelector('footer');
+  if (footer)
+    new IntersectionObserver(([e]) => {
+      atEnd = e.isIntersecting;
+      mark();
+    }).observe(footer);
 </script>
