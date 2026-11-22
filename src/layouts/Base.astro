@@ -72,18 +72,32 @@ const person = {
       )
     }
     {
-      lang === 'ro' && !noindex && (
+      !noindex && (
         <script is:inline>
           // Romanian lives at zalog.ro/; everyone else starts in English at /en/.
           // A language picked in the header wins, and so does arriving from another page of this site
           // (the pick may not be storable); crawlers are left alone (hreflang tells them about both).
+          // The page they came from goes along: on /en/ the analytics beacon takes the visit's source from
+          // document.referrer, which after the redirect is zalog.ro/ itself.
           (function () {
+            var key = 'redirect-referrer';
+            if (document.documentElement.lang === 'en') {
+              try {
+                var r = sessionStorage.getItem(key);
+                sessionStorage.removeItem(key);
+                var u = new URL(document.referrer);
+                if (r !== null && u.origin === location.origin && u.pathname === '/') Object.defineProperty(document, 'referrer', { value: r });
+              } catch (e) {}
+              return;
+            }
             var p, ref = '';
             try { p = localStorage.getItem('pref-lang'); } catch (e) {}
             try { ref = new URL(document.referrer).origin; } catch (e) {}
             if (p === 'ro' || ref === location.origin || /bot|crawl|spider|slurp|lighthouse/i.test(navigator.userAgent)) return;
             var l = (navigator.languages && navigator.languages[0]) || navigator.language || '';
-            if (p === 'en' || !/^ro\b/i.test(l)) location.replace('/en/' + location.search + location.hash);
+            if (p !== 'en' && /^ro\b/i.test(l)) return;
+            try { sessionStorage.setItem(key, document.referrer); } catch (e) {}
+            location.replace('/en/' + location.search + location.hash);
           })();
         </script>
       )
