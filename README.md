@@ -39,7 +39,8 @@ To add a project, append it to `recent` (with an `id`, its anchor) or to `earlie
 - The Display panel (theme, animations, text size) is stored in `localStorage` and applied before
   first paint. With reduced motion, from the panel or the OS, nothing animates.
 - Visits are counted with Cloudflare Web Analytics, which sets no cookies, so there is no cookie banner.
-  It loads only in the production build.
+  It loads only in the production build. The redirect to `/en/` passes the original referrer along in
+  `sessionStorage`, so those arrivals still count as visits, with their source.
 - Fonts are self-hosted through Fontsource; the site makes no request to Google Fonts.
 
 ## Deploy
