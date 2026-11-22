@@ -83,7 +83,8 @@ const person = {
             try { ref = new URL(document.referrer).origin; } catch (e) {}
             if (p === 'ro' || ref === location.origin || /bot|crawl|spider|slurp|lighthouse/i.test(navigator.userAgent)) return;
             var l = (navigator.languages && navigator.languages[0]) || navigator.language || '';
-            if (p === 'en' || !/^ro\b/i.test(l)) location.replace('/en/' + location.search + location.hash);
+            if (p !== 'en' && /^ro\b/i.test(l)) return;
+            location.replace('/en/' + location.search + location.hash);
           })();
         </script>
       )
